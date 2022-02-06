@@ -18,9 +18,9 @@ This is a firmware for the H32 board by Burgduino providing the following functi
 * Dynamic, configurable increase of sleep time when WiFi is not reachable
 
 The following third-party libraries are used in this sketch:
-*   Adafruit_AHTX0 by Adafruit
 *   WiFiManager by tzapu
+*   Adafruit_AHTX0 by Adafruit
 *   Thingspeak by Mathworks
 *   Arduino Client for MQTT by Nick O’Leary
 
-These can be installed using the library manager of the Arduino IDE (or downloaded from Github). An additional library for the PCF85063 by Jaakko Salo has been modified to some extent and is directly included.
+These can be installed using the library manager of the Arduino IDE (or downloaded from Github). An additional library for the PCF85063 by Jaakko Salo has been modified to quite some extent and is directly included.
