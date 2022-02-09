@@ -96,6 +96,7 @@ struct H32_Config_t {
     double coefficient = 1.0;
     double constant = 0.0;
     int8_t pin = 33;
+    int8_t activation = 0;
   } bat_v;
   struct {
     double coefficient = 1.0;
