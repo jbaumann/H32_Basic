@@ -54,6 +54,13 @@ const int button = 0;
 // This is the hardware pin that allows the H32 to turn itself off completely
 const int DONE = 13;
 
+/*
+ * The following values are used to examine the button(s) and decide whether they
+ * have been pressed long enough
+ */
+volatile uint32_t button_pressed = 0;
+const int button_press_length = 1000;
+
 
 // The header file in turn includes all needed header files and defines everything needed
 #include "H32_Basic.h"
@@ -74,11 +81,15 @@ void setup() {
   // Configure the button interrupts
   attachInterrupt(digitalPinToInterrupt(button), button_interrupt_function, FALLING);
   if(h32_config.trigger_pin > 0) {
-    attachInterrupt(digitalPinToInterrupt(h32_config.trigger_pin), button_interrupt_function, FALLING);  
+    pinMode(h32_config.trigger_pin, INPUT_PULLUP);
+    if(digitalRead(h32_config.trigger_pin) == LOW ) {
+      button_pressed = millis();
+    } else {
+      attachInterrupt(digitalPinToInterrupt(h32_config.trigger_pin), button_interrupt_function, FALLING);  
+    }    
   }
 
   // Init LED and turn it on, if configured
-  led_init();
   led_on();
 
   // Init debug printing and print a first newline
@@ -146,7 +157,13 @@ void read_and_send_data() {
   }
 
   // measure voltages
+  if(h32_config.bat_v.activation != 0) {
+    pin_on(h32_config.bat_v.activation);
+  }
   bat_v = read_voltage(h32_config.bat_v.pin, h32_config.bat_v.coefficient, h32_config.bat_v.constant);
+  if(h32_config.bat_v.activation != 0) {
+    pin_off(h32_config.bat_v.activation);
+  }
   ext_v = read_voltage(h32_config.ext_v.pin, h32_config.ext_v.coefficient, h32_config.ext_v.constant);
 
   // send data if needed
@@ -161,18 +178,16 @@ void read_and_send_data() {
 }
 
 /*
- * In the following functions we examine the button(s) and decide whether they
- * have been pressed long enough
- */
-volatile uint32_t button_pressed = 0;
-const int button_press_length = 1000;
-
-/*
  * The button_interrupt_function() is set as the interrupt function, executed when the
  * button is pressed. To debounce only the first press is recorded.
  */
-void button_interrupt_function()
+void IRAM_ATTR button_interrupt_function()
 {
+  detachInterrupt(digitalPinToInterrupt(button));
+  if(h32_config.trigger_pin > 0) {
+    detachInterrupt(digitalPinToInterrupt(h32_config.trigger_pin));  
+  }
+
   if(button_pressed == 0) {
     button_pressed = millis();  
   }

@@ -64,6 +64,12 @@ bool (*api_calls[]) (char *, char *, double, double, double, double) = {
 };
 
 /*
+ * the signature of our interrupt function
+ */
+void IRAM_ATTR button_interrupt_function();
+
+
+/*
  * This version value is stored in the config data and can be used to
  * determine whether the config data is valid
  */

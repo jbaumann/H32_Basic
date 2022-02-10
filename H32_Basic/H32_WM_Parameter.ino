@@ -15,8 +15,8 @@ WiFiManagerParameter rtc_link("<p><a href='/devices' class='D'>Show Device Readi
 // Basic Settings ----------
 WiFiManagerParameter basic_heading("<h2>Basic</h2>");
 WiFiManagerParameter basic_name("basic_name", "Device Name", "", SSID_LENGTH);
-WiFiManagerParameter basic_led_pin("basic_led_pin", "LED Pin (0 turns off, - is active low, + is active high)", "", U8_LENGTH, "pattern='-?\\d{0,2}'");
-WiFiManagerParameter basic_trigger_pin("basic_trigger_pin", "Additional Trigger Pin (0 turns off, - is active low, + is active high)", "", U8_LENGTH, "pattern='-?\\d{0,2}'");
+WiFiManagerParameter basic_led_pin("basic_led_pin", "LED Pin<br/>(0 turns off, - is active low, + is active high)", "", U8_LENGTH, "pattern='-?\\d{0,2}'");
+WiFiManagerParameter basic_trigger_pin("basic_trigger_pin", "Additional Trigger Pin<br/>(0 turns off", "", U8_LENGTH, "pattern='-?\\d{0,2}'");
 WiFiManagerParameter basic_timeout("basic_timeout", "WiFi Connection Timeout", "", U16_LENGTH);
 // RTC Settings
 WiFiManagerParameter rtc_heading("<h2>RTC</h2>");
@@ -25,7 +25,7 @@ WiFiManagerParameter rtc_factor("rtc_factor", "RTC Backoff Factor", "", DOUBLE_L
 WiFiManagerParameter rtc_limit("rtc_limit", "RTC Backoff Limit", "", DOUBLE_LENGTH);
 // Measurements ------------
 WiFiManagerParameter measurement_heading("<h2>Measurements</h2>");
-WiFiManagerParameter measurement_bat_activation("measurement_bat_activation", "Battery Measurement Activation Pin (0 turns off, - is active low, + is active high)", "", U8_LENGTH, "pattern='-?\\d{0,2}'");
+WiFiManagerParameter measurement_bat_activation("measurement_bat_activation", "Battery Measurement Activation Pin<br/>(0 turns off, - is active low, + is active high)", "", U8_LENGTH, "pattern='-?\\d{0,2}'");
 WiFiManagerParameter measurement_bat_coefficient("measurement_bat_coefficient", "Battery Voltage Compensation Coefficient", "", DOUBLE_LENGTH);
 WiFiManagerParameter measurement_bat_constant("measurement_bat_constant", "Battery Voltage Compensation Constant", "", DOUBLE_LENGTH);
 WiFiManagerParameter measurement_bat_pin("measurement_bat_pin", "Battery Voltage Pin", "", U8_LENGTH, "pattern='\\d{0,2}'");
