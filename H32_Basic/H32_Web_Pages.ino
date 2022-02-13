@@ -91,7 +91,12 @@ void handle_devices(){
 
   output += "<h2>Voltages</h2>";
   output += "<p>Battery Voltage: ";
-  output += String(read_voltage(h32_config.bat_v.pin, h32_config.bat_v.coefficient, h32_config.bat_v.constant)) + "V</p>";
+
+  pin_on(h32_config.bat_v.activation);
+  double bat_v = read_voltage(h32_config.bat_v.pin, h32_config.bat_v.coefficient, h32_config.bat_v.constant);
+  pin_off(h32_config.bat_v.activation);
+
+  output += String(bat_v) + "V</p>";
   output += "<p>Ext Voltage: ";
   output += String(read_voltage(h32_config.ext_v.pin, h32_config.ext_v.coefficient, h32_config.ext_v.constant)) + "V</p><hr/>";
 
