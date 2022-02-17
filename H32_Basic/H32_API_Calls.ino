@@ -6,7 +6,7 @@
 /*
  * This function implements the communication with the Thingspeak service
  */
-bool thingspeak_call(char* api_key, char *api_additional, double temperature, double humidity, double bat_v, double ext_v) {
+bool thingspeak_call(char* api_key, char *api_additional, H32_Measurements &measurements, unordered_map<char *, double> &additional_data) {
   WiFiClient  client;
 
   int myChannelNumber = atoi(api_additional);
@@ -17,10 +17,10 @@ bool thingspeak_call(char* api_key, char *api_additional, double temperature, do
   ThingSpeak.begin(client);  // Initialize ThingSpeak
 
   // set the fields with the values
-  ThingSpeak.setField(1, (float)temperature);
-  ThingSpeak.setField(2, (float)humidity);
-  ThingSpeak.setField(3, (float)bat_v);
-  ThingSpeak.setField(4, (float)ext_v);
+  ThingSpeak.setField(1, (float)measurements.getTemperature());
+  ThingSpeak.setField(2, (float)measurements.getHumidity());
+  ThingSpeak.setField(3, (float)measurements.getBatV());
+  ThingSpeak.setField(4, (float)measurements.getExtV());
 
   int x = ThingSpeak.writeFields(myChannelNumber, api_key);
   if(x == 200){
@@ -35,26 +35,38 @@ bool thingspeak_call(char* api_key, char *api_additional, double temperature, do
 /*
  * Small helper function that creates a json from the data
  */
-String create_json(double temperature, double humidity, double bat_v, double ext_v) {
-  String json;
-  json += "{ \"Temperature\": [ {\"value\": " + String(temperature) + " } ],";
-  json += "\"Humidity\": [ {\"value\": " + String(humidity) + " } ],";
-  json += "\"Battery Voltage\": [ {\"value\": " + String(bat_v) + " } ],";
-  json += "\"External Voltage\": [ {\"value\": " + String(ext_v) + " } ] }";
-  return json;
+void create_json(JsonObject &doc, H32_Measurements &measurements, unordered_map<char *, double> &additional_data) {
+
+  doc["Temperature"][0]["value"] = measurements.getTemperature();
+  doc["Humidity"][0]["value"] = measurements.getHumidity();
+  doc["Battery Voltage"][0]["value"] = measurements.getBatV();
+  doc["External Voltage"][0]["value"] = measurements.getExtV();
+
+  for(const auto & res: additional_data) {
+     debug_print("Additional: ");
+     debug_print(res.first);
+     debug_print(" - ");
+     debug_println(res.second);
+    doc[res.first][0]["value"] = res.second;
+  }
 }
 
 /*
  * This function implements the communication with the IOTPlotter service
  */
-bool iotplotter_call(char* api_key, char *api_additional, double temperature, double humidity, double bat_v, double ext_v) {
+bool iotplotter_call(char* api_key, char *api_additional, H32_Measurements &measurements, unordered_map<char *, double> &additional_data) {
   WiFiClient client;
   HTTPClient httpClient;
 
   // Create the json needed for the service
-  String json = "{\"data\":";
-  json += create_json(temperature, humidity, bat_v, ext_v);
-  json += "}";
+  StaticJsonDocument<json_doc_size> doc;
+  JsonObject object = doc.createNestedObject("data");
+  create_json(object, measurements, additional_data);
+
+  char json[json_doc_size];
+  serializeJson(doc, json);
+
+  debug_println("IOTPlotter JSON");
   debug_println(json);
 
   // Send the data with the needed header settings
@@ -64,7 +76,8 @@ bool iotplotter_call(char* api_key, char *api_additional, double temperature, do
   httpClient.addHeader("api-key", h32_config.api.key);
   int http_response_code = httpClient.POST(json);
 
-  debug_println(http_response_code);
+  debug_print(http_response_code);
+  debug_print(" ");
   debug_println(httpClient.getString());
 
   // Disconnect
@@ -77,7 +90,7 @@ bool iotplotter_call(char* api_key, char *api_additional, double temperature, do
  * This function implements the communication with the IOTPlotter service
  */
 const uint8_t mqtt_retries = 3;
-bool mqtt_call(double temperature, double humidity, double bat_v, double ext_v) {
+bool mqtt_call(H32_Measurements &measurements, unordered_map<char *, double> &additional_data) {
   WiFiClient  client;
   PubSubClient mqttClient(client);
 
@@ -85,12 +98,23 @@ bool mqtt_call(double temperature, double humidity, double bat_v, double ext_v) 
 
   mqttClient.setServer(h32_config.mqtt.server, h32_config.mqtt.port);
 
+  StaticJsonDocument<json_doc_size> doc;
+
   // Try to connect for "mqtt_retries" times. If successful, publish data as json
   for(int i = 0; i < mqtt_retries; i++) {
     if(mqttClient.connect(h32_config.name, h32_config.mqtt.user, h32_config.mqtt.passwd)) {
+
       debug_println("Connected to MQTT");
-      return mqttClient.publish (h32_config.mqtt.topic, create_json(temperature, humidity, bat_v, ext_v).c_str());
-      break;
+      JsonObject object = doc.to<JsonObject>();
+      create_json(object, measurements, additional_data);
+
+      char json[json_doc_size];
+      serializeJson(doc, json);
+
+      debug_println("MQTT JSON");
+      debug_println(json);
+
+      return mqttClient.publish (h32_config.mqtt.topic, json);
     }
     delay(100);
   }

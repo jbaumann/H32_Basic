@@ -43,3 +43,18 @@ double read_voltage (uint8_t pin, double coefficient, double constant) {
   debug_println(result);
   return result;
 }
+
+double read_bat_voltage() {
+ if(h32_config.bat_v.activation != 0) {
+    pin_on(h32_config.bat_v.activation);
+  }
+  double bat_v = read_voltage(h32_config.bat_v.pin, h32_config.bat_v.coefficient, h32_config.bat_v.constant);
+  if(h32_config.bat_v.activation != 0) {
+    pin_off(h32_config.bat_v.activation);
+  }
+  return bat_v;
+}
+
+double read_ext_voltage() {
+  return read_voltage(h32_config.ext_v.pin, h32_config.ext_v.coefficient, h32_config.ext_v.constant);
+}

@@ -17,16 +17,18 @@
  * Failed Connection Counter stored in RTC memory
  * Dynamic, configurable increase of sleep time when WiFi is not reachable
  * MQTT
+ * Extension mechanism for easy addition of user-specific code
  *
  * The following third-party libraries are used in this sketch:
  *   Adafruit_AHTX0 by Adafruit
  *   WiFiManager by tzapu
  *   Thingspeak by Mathworks
  *   Arduino Client for MQTT by Nick O’Leary
+ *   ArduinoJson by Benoit Blanchon (https://arduinojson.org/)
  *
  * These can be installed using the library manager of the Arduino IDE (or downloaded from Github)
- * An additional library for the PCF85063 by Jaakko Salo has been modified to some extent and is
- * directly included.
+ * An additional library for the PCF85063 by Jaakko Salo (https://github.com/jvsalo/pcf85063a) has
+ * been modified to some extent and is directly included.
  *
  * Author: Joachim Baumann
  */
@@ -35,8 +37,8 @@
  * The following three values represent the current version of the firmware
  */
 const uint8_t H32_MAJOR = 1;
-const uint8_t H32_MINOR = 12;
-const uint8_t H32_PATCH = 2;
+const uint8_t H32_MINOR = 23;
+const uint8_t H32_PATCH = 7;
 
 /*
  * The following values can be adjusted
@@ -66,9 +68,20 @@ const int button_press_length = 1000;
 #include "H32_Basic.h"
 
 
+/*
+ * The class extension needs a few things from H32_Basic.h. This would be cleaner
+ * if we put the needed definitions in a file of their own, but with Arduino IDE
+ * this is not manageable at all.
+ */
+#include "Extension.h"
+
 void setup() {
   // Turn off any alarm in RTC
   PCF85063A_Regs rtc_results = RTC_stop_and_check();
+
+  // Init debug printing and print a first newline
+  debug_init();
+  debug_println();
 
   // The ap_name is used for the access point name, the device name
   // and the title of the config page
@@ -78,6 +91,15 @@ void setup() {
   // Read the configuration from NVS
   read_config();
 
+  H32_Measurements measurements;
+
+  // Execute the init operation of the user extensions
+  if (Extension::hasEntries()) {
+    for (Extension *extension : *Extension::getContainer()) {
+      extension->init(measurements);
+    }
+  }
+
   // Configure the button interrupts
   attachInterrupt(digitalPinToInterrupt(button), button_interrupt_function, FALLING);
   if(h32_config.trigger_pin > 0) {
@@ -85,16 +107,12 @@ void setup() {
     if(digitalRead(h32_config.trigger_pin) == LOW ) {
       button_pressed = millis();
     } else {
-      attachInterrupt(digitalPinToInterrupt(h32_config.trigger_pin), button_interrupt_function, FALLING);  
-    }    
+      attachInterrupt(digitalPinToInterrupt(h32_config.trigger_pin), button_interrupt_function, FALLING);
+    }
   }
 
   // Init LED and turn it on, if configured
   led_on();
-
-  // Init debug printing and print a first newline
-  debug_init();
-  debug_println();
 
   // The rtc_results allow to differentiate between a "normal" reset and an RTC-triggered reset
   if(rtc_results != 0) {
@@ -120,7 +138,7 @@ void setup() {
     // Reset failed connections counter
     RTC_set_RAM(0);
     // Collect data and send it to the chosen channels
-    read_and_send_data();
+    read_and_send_data(measurements);
   } else {
     RTC_increment_RAM();
   }
@@ -145,36 +163,31 @@ void setup() {
   shutdown();
 }
 
-void read_and_send_data() {
-  double temperature = 0, humidity = 0, bat_v = 0, ext_v = 0;
-
-  // get sensor data
-  if(init_sensor()) {
-    temperature = get_temperature();
-    humidity = get_humidity();
-  } else {
-    debug_println("AHT10 not found. Check your board.");
+void read_and_send_data(H32_Measurements &measurements) {
+  // Execute the read operation of the user extensions
+  if (Extension::hasEntries()) {
+    for (Extension *extension : *Extension::getContainer()) {
+      extension->read(measurements);
+    }
   }
-
-  // measure voltages
-  if(h32_config.bat_v.activation != 0) {
-    pin_on(h32_config.bat_v.activation);
+  // doing this in two distinct steps ensures that all data is read
+  unordered_map<char *, double> additional_data;
+  if (Extension::hasEntries()) {
+    for (Extension *extension : *Extension::getContainer()) {
+      extension->collect(additional_data);
+    }
   }
-  bat_v = read_voltage(h32_config.bat_v.pin, h32_config.bat_v.coefficient, h32_config.bat_v.constant);
-  if(h32_config.bat_v.activation != 0) {
-    pin_off(h32_config.bat_v.activation);
-  }
-  ext_v = read_voltage(h32_config.ext_v.pin, h32_config.ext_v.coefficient, h32_config.ext_v.constant);
 
   // send data if needed
   if(h32_config.api.type != 0) {
-    api_calls[h32_config.api.type - 1](h32_config.api.key, h32_config.api.additional, temperature, humidity, bat_v, ext_v);      
+    api_calls[h32_config.api.type - 1](h32_config.api.key, h32_config.api.additional, measurements, additional_data);
   }
 
   // MQTT if needed
   if(strlen(h32_config.mqtt.server) != 0 && strlen(h32_config.mqtt.topic) != 0) {
-    mqtt_call(temperature, humidity, bat_v, ext_v);
+    mqtt_call(measurements, additional_data);
   }
+
 }
 
 /*
@@ -185,7 +198,7 @@ void IRAM_ATTR button_interrupt_function()
 {
   detachInterrupt(digitalPinToInterrupt(button));
   if(h32_config.trigger_pin > 0) {
-    detachInterrupt(digitalPinToInterrupt(h32_config.trigger_pin));  
+    detachInterrupt(digitalPinToInterrupt(h32_config.trigger_pin));
   }
 
   if(button_pressed == 0) {
@@ -216,8 +229,6 @@ bool button_is_pressed() {
 /*
  * Here starts the run part that is only executed if a button has been pressed
  */
-bool portal_started = false;
-uint8_t dot_count = 0;
 
 /*
  * The loop function will be executed until either OTA has been executed, the 
@@ -225,6 +236,8 @@ uint8_t dot_count = 0;
  */
 void loop() {
   // If we arrive here the button has been pressed
+  static bool portal_started = false;
+  static uint8_t dot_count = 0;
 
   // blink the LED in regular intervals to give a visual cue
   led_toggle();

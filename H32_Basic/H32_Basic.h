@@ -1,12 +1,20 @@
+#ifndef H32_BASIC_H
+#define H32_BASIC_H
+
+#include <unordered_map>
+
+using namespace std;
+
 #include <WiFiManager.h>
 #include <ESPmDNS.h>
 #include <WiFiUdp.h>
 #include <ArduinoOTA.h>
-#include "PCF85063A.h"
 #include <PubSubClient.h>
+#include <ArduinoJson.h>
 #include <soc/soc.h>
 #include <soc/rtc_cntl_reg.h>
 
+#include "PCF85063A.h"
 /* 
  * The following macros allow us to enable/disable debugging without runtime overhead
  */
@@ -34,6 +42,52 @@ const uint8_t U8_LENGTH = 3;
 const uint8_t DOUBLE_LENGTH = 10;
 
 /*
+ * Forward definitions for the following class
+ */
+double read_bat_voltage();
+double read_ext_voltage();
+bool init_sensor();
+float get_temperature();
+float get_humidity();
+
+/*
+ * This class contains the data collected by the H32_Basic
+ */
+struct H32_Measurements {
+private:
+  bool valid = false;
+  bool initSuccess = false;
+  double batV;
+  double extV;
+  double temperature;
+  double humidity;
+protected:
+public:
+  void readMeasurements() {
+    if(!valid) {
+      debug_println("Acquiring Measurements.");
+      batV = read_bat_voltage();
+      extV = read_ext_voltage();
+      if(init_sensor()) {
+        temperature = (int)(get_temperature() * 100 + 0.5) / 100.0;
+        humidity = (int)(get_humidity() * 100 + 0.5) / 100.0;
+        initSuccess = true;
+      } else {
+        debug_println("AHT10 not found. Check your board.");
+      }
+      valid = true;
+    }
+  };
+  double getBatV() { readMeasurements(); return batV;};
+  double getExtV() { readMeasurements(); return extV; };
+  double getTemperature() { readMeasurements(); return temperature; };
+  double getHumidity() { readMeasurements(); return humidity; };
+  void reset() { valid = false; };
+  bool isValid() { return valid; };
+  bool isInitSuccessful() { return initSuccess; };
+};
+
+/*
  * One of the Parameter entries in the WiFiManager is a combination of dropdown and
  * normal input field. This has to be handwritten and the following info is used
  * for that. The APIType is also used in the function table that contains the 
@@ -54,14 +108,19 @@ const int apitype_num = sizeof(apitype_names)/sizeof(char *);
 /*
  * This table contains the functions for communication with external APIs.
  * The function signature is 
- * bool f(char*, char*, double, double, double, double)
+ * bool f(char*, char*, H32_Measurements &, unordered_map<char *, double> &)
  */
-bool thingspeak_call(char *api_key, char *api_additional, double temperature, double humidity, double bat_v, double ext_v);
-bool iotplotter_call(char *api_key, char *api_additional, double temperature, double humidity, double bat_v, double ext_v);
-bool (*api_calls[]) (char *, char *, double, double, double, double) = {
+bool thingspeak_call(char *api_key, char *api_additional, H32_Measurements &measurements, unordered_map<char *, double> &additional_data);
+bool iotplotter_call(char *api_key, char *api_additional, H32_Measurements &measurements, unordered_map<char *, double> &additional_data);
+bool (*api_calls[]) (char *, char *, H32_Measurements &, unordered_map<char *, double> &) = {
   thingspeak_call,
   iotplotter_call,
 };
+
+/*
+ * The size of json document buffers
+ */
+const uint16_t json_doc_size = 1024;
 
 /*
  * the signature of our interrupt function
@@ -77,10 +136,13 @@ const uint16_t h32_major_minor = H32_MAJOR << 8 | H32_MINOR;
 
 
 /*
- * The Configuration data is saved to NVS (EEPROM) whenever the user changes something
+ * The Configuration data is saved to LittleFS as a json file whenever
+ * the user changes something.
  */
 
 const char *h32_prefs_key = "h32_config";
+const char *h32_prefs_dir = "/h32_config";
+const char *h32_prefs_path = "/h32_config/h32_config.json";
 
 struct H32_Config_t {
   uint16_t version = h32_major_minor;
@@ -122,3 +184,5 @@ struct H32_Config_t {
     int8_t gmtOffset_h = 1;
   } ntp;
 } h32_config;
+
+#endif // H32_BASIC_H

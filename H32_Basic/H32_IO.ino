@@ -21,7 +21,7 @@ int pinMode(uint8_t pin)
 
 /*
  * The following functions allow to set a pin active or inactive. A pin number 0 is ignored.
- * An active state is a state where 
+ * An active state is a state where
  *     the pin is HIGH if the pin number is positive
  *     the pin is LOW if the pin number is negative
  * An inactive state is in tristate (there might still be a weak pull-up or pull-down resistor,
@@ -37,7 +37,7 @@ void pin_on(int8_t pin) {
     digitalWrite(pin, HIGH);
   } else {
     // active low
-    digitalWrite(-pin, LOW);    
+    digitalWrite(-pin, LOW);
   }
 }
 void pin_off(int8_t pin) {
@@ -51,7 +51,7 @@ void pin_toggle(int8_t pin) {
     return;
   }
   if(pinMode(pin) == OUTPUT) {
-    pin_off(pin);  
+    pin_off(pin);
   } else {
     pin_on(pin);
   }
