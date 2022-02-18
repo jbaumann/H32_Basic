@@ -26,6 +26,11 @@ public:
    */
   void init(H32_Measurements &measurements);
   /*
+   * The init() method is used to initializes your sensor and instance data.
+   * It receives the current measurements as a parameter should it need them.
+   */
+  void wiFiInitialized(bool wiFiInitialized);
+  /*
    * The read() method is used to read the sensor and store its data locally.
    * Access to the basic H32 measurements is provided via the parameter if
    * needed.
@@ -52,6 +57,9 @@ namespace {
 }
 
 void UserExtension::init(H32_Measurements &measurements) { 
+  debug_println("UserExtension Init");
+ };
+void UserExtension::wiFiInitialized(bool wiFiInitialized) { 
   debug_println("UserExtension Init");
  };
 void UserExtension::read(H32_Measurements &measurements) {
