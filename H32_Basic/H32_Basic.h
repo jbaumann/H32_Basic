@@ -1,20 +1,6 @@
 #ifndef H32_BASIC_H
 #define H32_BASIC_H
 
-#include <unordered_map>
-
-using namespace std;
-
-#include <WiFiManager.h>
-#include <ESPmDNS.h>
-#include <WiFiUdp.h>
-#include <ArduinoOTA.h>
-#include <PubSubClient.h>
-#include <ArduinoJson.h>
-#include <soc/soc.h>
-#include <soc/rtc_cntl_reg.h>
-
-#include "PCF85063A.h"
 /* 
  * The following macros allow us to enable/disable debugging without runtime overhead
  */
@@ -29,10 +15,23 @@ using namespace std;
 #define debug_println(...)
 #endif
 
-/*
- * The WiFiManager is used for all communication with the user via the web portal
- */
-WiFiManager wm;
+#include <unordered_map>
+
+using namespace std;
+
+#include <WiFiManager.h>
+#include <ESPmDNS.h>
+#include <WiFiUdp.h>
+#include <ArduinoOTA.h>
+#include <PubSubClient.h>
+#include <ArduinoJson.h>
+#include <soc/soc.h>
+#include <soc/rtc_cntl_reg.h>
+
+#include "PCF85063A.h"
+
+#include "H32_Measurements.h"
+
 const uint8_t SSID_LENGTH = 33;
 const uint8_t NAME_LENGTH = 50;
 const uint8_t TOPIC_LENGTH = 100;  // in theory 32.767 characters
@@ -40,52 +39,6 @@ const uint8_t U32_LENGTH = 10;
 const uint8_t U16_LENGTH = 5;
 const uint8_t U8_LENGTH = 3;
 const uint8_t DOUBLE_LENGTH = 10;
-
-/*
- * Forward definitions for the following class
- */
-double read_bat_voltage();
-double read_ext_voltage();
-bool init_sensor();
-float get_temperature();
-float get_humidity();
-
-/*
- * This class contains the data collected by the H32_Basic
- */
-struct H32_Measurements {
-private:
-  bool valid = false;
-  bool initSuccess = false;
-  double batV;
-  double extV;
-  double temperature;
-  double humidity;
-protected:
-public:
-  void readMeasurements() {
-    if(!valid) {
-      debug_println("Acquiring Measurements.");
-      batV = read_bat_voltage();
-      extV = read_ext_voltage();
-      if(init_sensor()) {
-        temperature = (int)(get_temperature() * 100 + 0.5) / 100.0;
-        humidity = (int)(get_humidity() * 100 + 0.5) / 100.0;
-        initSuccess = true;
-      } else {
-        debug_println("AHT10 not found. Check your board.");
-      }
-      valid = true;
-    }
-  };
-  double getBatV() { readMeasurements(); return batV;};
-  double getExtV() { readMeasurements(); return extV; };
-  double getTemperature() { readMeasurements(); return temperature; };
-  double getHumidity() { readMeasurements(); return humidity; };
-  void reset() { valid = false; };
-  bool isValid() { return valid; };
-  bool isInitSuccessful() { return initSuccess; };
-};
 
 /*
  * One of the Parameter entries in the WiFiManager is a combination of dropdown and
@@ -127,13 +80,11 @@ const uint16_t json_doc_size = 1024;
  */
 void IRAM_ATTR button_interrupt_function();
 
-
 /*
  * This version value is stored in the config data and can be used to
  * determine whether the config data is valid
  */
 const uint16_t h32_major_minor = H32_MAJOR << 8 | H32_MINOR;
-
 
 /*
  * The Configuration data is saved to LittleFS as a json file whenever
@@ -144,7 +95,7 @@ const char *h32_prefs_key = "h32_config";
 const char *h32_prefs_dir = "/h32_config";
 const char *h32_prefs_path = "/h32_config/h32_config.json";
 
-struct H32_Config_t {
+typedef struct H32_Config {
   uint16_t version = h32_major_minor;
   uint16_t timeout = 20;
   char name[SSID_LENGTH+1];
@@ -183,6 +134,6 @@ struct H32_Config_t {
     int8_t daylightOffset_h = 1;
     int8_t gmtOffset_h = 1;
   } ntp;
-} h32_config;
+} H32_Config;
 
 #endif // H32_BASIC_H

@@ -3,6 +3,8 @@
 
 #include <vector>
 
+#include "H32_Measurements.h"
+
 using namespace std;
 
 class Extension {
@@ -17,6 +19,7 @@ public:
   static inline vector<Extension *> * getContainer() { return userFunctions; };
 
   virtual void init(H32_Measurements &measurements) { debug_println("Extension: Default Init"); };
+  virtual void wiFiInitialized(bool wiFiInitialized) { debug_println("Extension: Default wiFiInitialized"); };
   virtual void read(H32_Measurements measurements) { debug_println("Extension: Default Read"); };
   virtual void collect(unordered_map<char *, double> &data) { debug_println("Extension: Default Collect"); };
 };

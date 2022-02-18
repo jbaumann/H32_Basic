@@ -75,6 +75,16 @@ const int button_press_length = 1000;
  */
 #include "Extension.h"
 
+/*
+ * The following struct contains all configuration information.
+ */
+H32_Config h32_config;
+
+/*
+ * The WiFiManager is used for all communication with the user via the web portal
+ */
+WiFiManager wm;
+
 void setup() {
   // Turn off any alarm in RTC
   PCF85063A_Regs rtc_results = RTC_stop_and_check();
@@ -123,6 +133,13 @@ void setup() {
   // We initialize the WiFiManager that checks for stored credentials. If none are available,
   // a captive portal is opened. Otherwise it tries to connect to the network.
   init_WiFiManager();
+
+  // Execute the wiFiInitialized operation of the user extensions
+  if (Extension::hasEntries()) {
+    for (Extension *extension : *Extension::getContainer()) {
+      extension->wiFiInitialized(WiFi.isConnected());
+    }
+  }
 
   // Some visual feedback
   led_toggle();
@@ -187,7 +204,6 @@ void read_and_send_data(H32_Measurements &measurements) {
   if(strlen(h32_config.mqtt.server) != 0 && strlen(h32_config.mqtt.topic) != 0) {
     mqtt_call(measurements, additional_data);
   }
-
 }
 
 /*
