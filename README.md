@@ -1,8 +1,31 @@
 # H32_Basic - A Firmware for the H32 board
 
-the H32 by Burgduino is an ESP32-board with a lot of functionality, most importantly it features a low-power current of only 250nA, which is unbelievably low for an ESP32-board. It reaches this low current by using a power switch to fully separate the ESP32 and connected sensors from power. An RTC can be programmed to turn the system on again after a programmable time.
+## For the Impatient
+If you want to read about the details of hardware and firmware, jump to the [Wiki](https://github.com/jbaumann/H32_Basic/wiki)
 
-This firmware provides the following functionality (without any particular order):
+## What is it?
+
+The H32 by Burgduino is an ESP32-board with a lot of functionality, most importantly it features a low-power current of only 250nA, which is unbelievably low for an ESP32-board. It reaches this low current by using a power switch to fully separate the ESP32 and connected sensors from power. An RTC can be programmed to turn the system on again after a programmable time.
+
+<img src="https://github.com/jbaumann/H32_Basic/wiki/miscellaneous/H32-Pic1.jpg" width=33%>
+
+Other aspects worth mentioning are:
+* LiIon charger
+* Input Voltage from 5-30V
+* Battery Protection
+* multiple battery configurations possible
+* AHT10 temperature and humidity sensor
+* LoRa module (optional)
+* EEPROM for data storage (optional)
+* Prepared for up to 4 voltage dividers to measure external voltages
+
+Here is a graphic detailing this on the board itself:
+
+<img src="https://github.com/jbaumann/H32_Basic/wiki/miscellaneous/H32-REV2-TOPOLOGY.jpg" width=33%>
+
+## The Firmware
+
+The firmware provides the following functionality (without any particular order):
 * OTA Updates
 * Portal for entering credentials
 * Portal allows to enter additional configuration data
