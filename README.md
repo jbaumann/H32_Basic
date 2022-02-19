@@ -51,3 +51,5 @@ The following third-party libraries are used in this sketch:
 *   ArduinoJson by Benoît Blanchon
 
 These can be installed using the library manager of the Arduino IDE (or downloaded from Github). An additional library for the PCF85063 by Jaakko Salo has been modified to quite some extent and is directly included.
+
+All the further details can be found in the [Wiki](https://github.com/jbaumann/H32_Basic/wiki)
