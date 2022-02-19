@@ -1,7 +1,7 @@
 # H32_Basic - A Firmware for the H32 board
 
 ## For the Impatient
-If you want to read about the details of hardware and firmware, jump to the [Wiki](https://github.com/jbaumann/H32_Basic/wiki)
+If you want to read about the details of hardware and firmware, jump to the [Wiki](https://github.com/jbaumann/H32_Basic/wiki).
 
 ## What is it?
 
@@ -52,4 +52,4 @@ The following third-party libraries are used in this sketch:
 
 These can be installed using the library manager of the Arduino IDE (or downloaded from Github). An additional library for the PCF85063 by Jaakko Salo has been modified to quite some extent and is directly included.
 
-All the further details can be found in the [Wiki](https://github.com/jbaumann/H32_Basic/wiki)
+All the further details can be found in the [Wiki](https://github.com/jbaumann/H32_Basic/wiki).
