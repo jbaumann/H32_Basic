@@ -1,7 +1,7 @@
 #ifndef H32_BASIC_H
 #define H32_BASIC_H
 
-/* 
+/*
  * The following macros allow us to enable/disable debugging without runtime overhead
  */
 #define SERIAL_SPEED 115200

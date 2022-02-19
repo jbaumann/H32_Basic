@@ -29,17 +29,19 @@ void RTC_get_time(tm *time_info) {
 /*
  * The following function stops any countdown or alarm
  * after checking it. The result is returned.
+ * Sooner or later this should be refactored into the class.
  */
 PCF85063A_Regs RTC_stop_and_check() {
   PCF85063A_Regs regs = 0;
   PCF85063A_Regs result = 0;
 
-  // get the registers
+  // Get the registers
   rtc.ctrl_get(&regs);
+
   // stop any countdown
   rtc.countdown_set(false, PCF85063A::CNTDOWN_CLOCK_1HZ, 0, false, false);
 
-  // clean alarm and countdown bits
+  // Clear alarm and countdown bits
   PCF85063A_Regs new_regs = regs;
   PCF85063A_REG_SET(new_regs, PCF85063A_REG_AF);
   PCF85063A_REG_SET(new_regs, PCF85063A_REG_TF);
@@ -56,7 +58,8 @@ PCF85063A_Regs RTC_stop_and_check() {
     result |= PCF85063A_REG_TF;
     PCF85063A_REG_CLEAR(new_regs, PCF85063A_REG_TF);
   }
-  // PCF85063A_REG_CLEAR(new_regs, result);
+  // Clear the alarm enable bit
+  PCF85063A_REG_CLEAR(new_regs, PCF85063A_REG_AIE);
 
   rtc.ctrl_set(new_regs, false);
   
