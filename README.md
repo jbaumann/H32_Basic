@@ -41,6 +41,8 @@ The firmware provides the following functionality (without any particular order)
 * Portal allows to set the RTC to NTP time
 * Failed Connection Counter stored in RTC memory
 * Dynamic, configurable increase of sleep time when WiFi is not reachable
+* Oversampling for ADC measurements
+* Polynomial correction of the ADC measurements
 * Extension mechanism that allows you to include your own user code
 
 The following third-party libraries are used in this sketch:
