@@ -7,7 +7,7 @@ If you want to read about the details of hardware and firmware, jump to the [Wik
 
 The H32 by Burgduino is an ESP32-board with a lot of functionality, most importantly it features a low-power current of only 250nA, which is unbelievably low for an ESP32-board. It reaches this low current by using a power switch to fully separate the ESP32 and connected sensors from power. An RTC can be programmed to turn the system on again after a programmable time.
 
-<img src="https://github.com/jbaumann/H32_Basic/wiki/miscellaneous/H32-Pic1.jpg" width=33%>
+<img src="https://github.com/jbaumann/H32_Basic/wiki/miscellaneous/H32-Pic1.jpg" width=50%>
 
 Other aspects worth mentioning are:
 * LiIon charger
@@ -21,7 +21,7 @@ Other aspects worth mentioning are:
 
 Here is a graphic detailing this on the board itself:
 
-<img src="https://github.com/jbaumann/H32_Basic/wiki/miscellaneous/H32-REV2-TOPOLOGY.jpg" width=33%>
+<img src="https://github.com/jbaumann/H32_Basic/wiki/miscellaneous/H32-REV2-TOPOLOGY.jpg" width=50%>
 
 ## The Firmware
 
