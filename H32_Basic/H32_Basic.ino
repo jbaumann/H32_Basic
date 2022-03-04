@@ -23,7 +23,7 @@
  *   Adafruit_AHTX0 by Adafruit
  *   WiFiManager by tzapu
  *   Thingspeak by Mathworks
- *   Arduino Client for MQTT by Nick O’Leary
+ *   PubSubClient by Nick O’Leary
  *   ArduinoJson by Benoit Blanchon (https://arduinojson.org/)
  *
  * These can be installed using the library manager of the Arduino IDE (or downloaded from Github)

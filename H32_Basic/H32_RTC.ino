@@ -8,11 +8,15 @@
 PCF85063A rtc;
 
 /*
- * Setting the time is simply a call to the rtc object
+ * We are setting the time as part of the portal mode, when the
+ * user presses the button to set the time to the NTP time.
+ * To ensure that the RTC is in a well-defined state (e.g., after
+ * exchanging the battery) we reset the RTC registers first.
  */
 void RTC_set_time(tm *time_info) {
   debug_print("Setting the RTC to: ");
   debug_println(time_info, "%H:%M:%S, %B %d %Y");
+  rtc.reset();
   rtc.time_set(time_info);
 }
 

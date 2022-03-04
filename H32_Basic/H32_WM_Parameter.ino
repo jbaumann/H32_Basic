@@ -16,7 +16,7 @@ WiFiManagerParameter rtc_link("<p><a href='/devices' class='D'>Show Device Readi
 WiFiManagerParameter basic_heading("<h2>Basic</h2>");
 WiFiManagerParameter basic_name("basic_name", "Device Name", "", SSID_LENGTH);
 WiFiManagerParameter basic_led_pin("basic_led_pin", "LED Pin<br/>(0 turns off, - is active low, + is active high)", "", U8_LENGTH, "pattern='-?\\d{0,2}'");
-WiFiManagerParameter basic_trigger_pin("basic_trigger_pin", "Additional Trigger Pin<br/>(0 turns off", "", U8_LENGTH, "pattern='-?\\d{0,2}'");
+WiFiManagerParameter basic_trigger_pin("basic_trigger_pin", "Additional Trigger Pin<br/>(0 turns off)", "", U8_LENGTH, "pattern='-?\\d{0,2}'");
 WiFiManagerParameter basic_timeout("basic_timeout", "WiFi Connection Timeout", "", U16_LENGTH);
 // RTC Settings
 WiFiManagerParameter rtc_heading("<h2>RTC</h2>");
