@@ -38,7 +38,7 @@
  */
 const uint8_t H32_MAJOR = 1;
 const uint8_t H32_MINOR = 23;
-const uint8_t H32_PATCH = 7;
+const uint8_t H32_PATCH = 8;
 
 /*
  * The following values can be adjusted
