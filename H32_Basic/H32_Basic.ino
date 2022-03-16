@@ -37,8 +37,8 @@
  * The following three values represent the current version of the firmware
  */
 const uint8_t H32_MAJOR = 1;
-const uint8_t H32_MINOR = 23;
-const uint8_t H32_PATCH = 8;
+const uint8_t H32_MINOR = 24;
+const uint8_t H32_PATCH = 0;
 
 /*
  * The following values can be adjusted
@@ -55,6 +55,9 @@ const int button = 0;
 
 // This is the hardware pin that allows the H32 to turn itself off completely
 const int DONE = 13;
+
+// This is the fallback time for the RTC in case battery protection is triggered during execution.
+const int SLEEPTIME_FALLBACK = 120;
 
 /*
  * The following values are used to examine the button(s) and decide whether they
@@ -88,6 +91,9 @@ WiFiManager wm;
 void setup() {
   // Turn off any alarm in RTC
   PCF85063A_Regs rtc_results = RTC_stop_and_check();
+
+  // Set the alarm, in case we are in a low power situation
+  RTC_set_alarm(SLEEPTIME_FALLBACK); // parameters
 
   // Init debug printing and print a first newline
   debug_init();
@@ -175,7 +181,7 @@ void setup() {
   factor = factor > h32_config.rtc.limit ? h32_config.rtc.limit : factor;
   sleeptime *= factor;
 
-  // Set the alarm and shut down the whole system. This 
+  // Set the alarm and shut down the whole system.
   RTC_set_alarm(sleeptime); // parameters
   shutdown();
 }
@@ -224,7 +230,7 @@ void IRAM_ATTR button_interrupt_function()
 /*
  * This function simply tests if the button is pressed after "button_press_length"
  * has passed. This function is extremely simple and does not check whether 
- * the/a button has been released in the meantime.
+ * the button has been released in the meantime.
  */
 bool button_is_pressed() {
   if(button_pressed != 0) {
@@ -252,6 +258,10 @@ bool button_is_pressed() {
  */
 void loop() {
   // If we arrive here the button has been pressed
+
+  // Turn off any alarm in RTC
+  PCF85063A_Regs rtc_results = RTC_stop_and_check();
+
   static bool portal_started = false;
   static uint8_t dot_count = 0;
 
