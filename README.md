@@ -31,7 +31,7 @@ Other aspects worth mentioning are:
 
 Here is a graphic detailing this on the board itself (revision 2):
 
-<img src="https://github.com/jbaumann/H32_Basic/wiki/miscellaneous/H32-REV2-TOPOLOGY.jpg" width=50%>
+<img src="https://github.com/jbaumann/H32_Basic/wiki/miscellaneous/H32-REV2-TOPOLOGY.jpg" width=100%>
 
 ## The Firmware
 
