@@ -12,6 +12,7 @@ Here a picture of revision 1:
 <img src="https://github.com/jbaumann/H32_Basic/wiki/miscellaneous/H32-Pic1.jpg" width=50%>
 
 and here a picture of revision 2:
+
 <img src="https://github.com/jbaumann/H32_Basic/wiki/miscellaneous/H32-rev2.jpg" width=50%>
 
 
