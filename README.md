@@ -1,5 +1,8 @@
 # H32_Basic - A Firmware for the H32 board
 
+## Important for H32 revision 2
+In this revision the labels for the external battery connector are switched. GND is near the board edge, battery power (the plus pole) is the inner connection. If you connect an external battery, double check, and then check again to ensure that you do not damage the board.
+
 ## For the Impatient
 If you want to read about the details of hardware and firmware, jump to the [Wiki](https://github.com/jbaumann/H32_Basic/wiki).
 
@@ -11,7 +14,7 @@ Here a picture of revision 1:
 
 <img src="https://github.com/jbaumann/H32_Basic/wiki/miscellaneous/H32-Pic1.jpg" width=50%>
 
-and here a picture of revision 2:
+and here a picture of revision 2 (this one with a LoRa module):
 
 <img src="https://github.com/jbaumann/H32_Basic/wiki/miscellaneous/H32-rev2.jpg" width=50%>
 
@@ -26,7 +29,7 @@ Other aspects worth mentioning are:
 * EEPROM for data storage (optional)
 * Prepared for up to 4 voltage dividers to measure external voltages
 
-Here is a graphic detailing this on the board itself:
+Here is a graphic detailing this on the board itself (revision 2):
 
 <img src="https://github.com/jbaumann/H32_Basic/wiki/miscellaneous/H32-REV2-TOPOLOGY.jpg" width=50%>
 
