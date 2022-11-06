@@ -178,12 +178,19 @@ void setup() {
   uint8_t failed_conns = RTC_get_RAM();
   uint32_t sleeptime = h32_config.rtc.sleeptime;
   double factor = pow(h32_config.rtc.factor, failed_conns);
-  factor = factor > h32_config.rtc.limit ? h32_config.rtc.limit : factor;
+  if (factor > h32_config.rtc.limit) {
+    factor = h32_config.rtc.limit;
+  }
   sleeptime *= factor;
 
   // Set the alarm and shut down the whole system.
-  RTC_set_alarm(sleeptime); // parameters
-  shutdown();
+  bool success = RTC_set_alarm(sleeptime);
+  if(success) {
+    shutdown();
+  } else {
+    debug_println("Setting the alarm did not work. Resetting");
+    ESP.restart();
+  }
 }
 
 void read_and_send_data(H32_Measurements &measurements) {

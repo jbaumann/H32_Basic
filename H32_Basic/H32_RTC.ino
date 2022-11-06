@@ -117,7 +117,12 @@ bool RTC_set_alarm(int32_t sleeptime) {
  * Get the byte stored in the RTC RAM
  */
 int16_t RTC_get_RAM() {
-  return rtc.ram_get();
+  int16_t result = rtc.ram_get();
+  if(result == -1) {
+    // If reading the RTC value is unsuccessful we return 0
+    result = 0;
+  }
+  return result;
 }
 
 /*
