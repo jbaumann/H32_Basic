@@ -212,6 +212,13 @@ void read_and_send_data(H32_Measurements &measurements) {
   if(h32_config.api.type != 0) {
     api_calls[h32_config.api.type - 1](h32_config.api.key, h32_config.api.additional, measurements, additional_data);
   }
+  // call user extensions if existing
+  if (Extension::hasEntries()) {
+    for (Extension *extension : *Extension::getContainer()) {
+      extension->api_call(h32_config.api.key, h32_config.api.additional, measurements, additional_data);
+    }
+  }
+
 
   // MQTT if needed
   if(strlen(h32_config.mqtt.server) != 0 && strlen(h32_config.mqtt.topic) != 0) {

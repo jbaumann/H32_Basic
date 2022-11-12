@@ -18,10 +18,27 @@ public:
   static inline bool hasEntries() { return userFunctions != NULL; };
   static inline vector<Extension *> * getContainer() { return userFunctions; };
 
-  virtual void init(H32_Measurements &measurements) { debug_println("Extension: Default Init"); };
-  virtual void wiFiInitialized(bool wiFiInitialized) { debug_println("Extension: Default wiFiInitialized"); };
-  virtual void read(H32_Measurements measurements) { debug_println("Extension: Default Read"); };
-  virtual void collect(unordered_map<char *, double> &data) { debug_println("Extension: Default Collect"); };
+  virtual bool init(H32_Measurements &measurements) { 
+    debug_println("Extension: Default Init");
+    return true;
+  };
+  virtual bool wiFiInitialized(bool wiFiInitialized) {
+    debug_println("Extension: Default wiFiInitialized");
+    return true;
+  };
+  virtual bool read(H32_Measurements measurements) {
+    debug_println("Extension: Default Read");
+    return true;
+  };
+  virtual bool collect(unordered_map<char *, double> &data) {
+    debug_println("Extension: Default Collect");
+    return true;
+  };
+  virtual bool api_call(char* api_key, char *api_additional, 
+          H32_Measurements &measurements, unordered_map<char *, double> &additional_data) {
+     debug_println("Extension: Default API Call");
+     return true;
+  };
 };
 // Out-of-line initialization for non-const static members
 vector<Extension *>  *Extension::userFunctions = NULL;

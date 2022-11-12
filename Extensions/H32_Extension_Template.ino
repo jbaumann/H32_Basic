@@ -22,25 +22,39 @@ public:
   /*
    * The init() method is used to initializes your sensor and instance data.
    * It receives the current measurements as a parameter should it need them.
+   * @return true if successful
    */
-  void init(H32_Measurements &measurements);
+  bool init(H32_Measurements &measurements);
   /*
    * The init() method is used to initializes your sensor and instance data.
    * It receives the current measurements as a parameter should it need them.
+   * @return true if successful
    */
-  void wiFiInitialized(bool wiFiInitialized);
+  bool wiFiInitialized(bool wiFiInitialized);
   /*
    * The read() method is used to read the sensor and store its data locally.
    * Access to the basic H32 measurements is provided via the parameter if
    * needed.
+   * @return true if successful
    */
-  void read(H32_Measurements &measurements);
+  bool read(H32_Measurements &measurements);
   /*
    * The collect() method is used to collect your sensor data into the map
    * that is provides as a reference parameter. Data you add here will be
    * added to the JSON that is sent via MQTT and to IOTPLotter.
+   * @return true if successful
    */
-  void collect(unordered_map<char *, double> &data);
+  bool collect(unordered_map<char *, double> &data);
+  /*
+   * the api_call() method allows to implement your own method of sending data.
+   * It gets the same data as parameters as the original api_call methods.
+   * If you use this method, then you should set the api call type to "unset"
+   * and put the data in the API settings
+   * @return true if successful
+   */
+   bool api_call(char* api_key, char *api_additional, 
+        H32_Measurements &measurements, unordered_map<char *, double> &additional_data);
+
 };
 namespace {
   /*  
@@ -55,15 +69,24 @@ namespace {
   Extension *extension = new UserExtension();
 }
 
-void UserExtension::init(H32_Measurements &measurements) { 
+bool UserExtension::init(H32_Measurements &measurements) { 
   debug_println("UserExtension Init");
+  return true;
  };
-void UserExtension::wiFiInitialized(bool wiFiInitialized) { 
-  debug_println("UserExtension Init");
+bool UserExtension::wiFiInitialized(bool wiFiInitialized) { 
+  debug_println("UserExtension WiFi Init");
+  return true;
  };
-void UserExtension::read(H32_Measurements &measurements) {
+bool UserExtension::read(H32_Measurements &measurements) {
   debug_println("UserExtension Read");
+  return true;
 };
-void UserExtension::collect(unordered_map<char *, double> &data) {
-  debug_println("UserExtension Send");
+bool UserExtension::collect(unordered_map<char *, double> &data) {
+  debug_println("UserExtension Collect");
+  return true;
+};
+bool UserExtension::api_call(char* api_key, char *api_additional, 
+        H32_Measurements &measurements, unordered_map<char *, double> &additional_data) {
+  debug_println("UserExtension: Default API Call");
+  return true;
 };
