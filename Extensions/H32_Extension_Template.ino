@@ -46,14 +46,34 @@ public:
    */
   bool collect(unordered_map<char *, double> &data);
   /*
-   * the api_call() method allows to implement your own method of sending data.
+   * the api_call() method allows to implement your own method of sending data
+   * using WiFi connectivity. The method is only called when a WiFi connection
+   * could be established.
    * It gets the same data as parameters as the original api_call methods.
    * If you use this method, then you should set the api call type to "unset"
    * and put the data in the API settings
    * @return true if successful
    */
-   bool api_call(char* api_key, char *api_additional, 
-        H32_Measurements &measurements, unordered_map<char *, double> &additional_data);
+  bool api_call(char* api_key, char *api_additional,
+       H32_Measurements &measurements, unordered_map<char *, double> &additional_data);
+  /*
+   * the api_call_no_wifi() method allows to implement your own method of
+   * sending data without WiFi connectivity. The method is only called when
+   * no WiFi connection could be established.
+   * If you use this method, then you should set the api call type to "unset"
+   * and put the data in the API settings
+   * @return true if successful
+   */
+  bool api_call_no_wifi(char* api_key, char *api_additional,
+       H32_Measurements &measurements, unordered_map<char *, double> &additional_data);
+  /*
+   * This method allows a user extension to veto the incremental backup functionality.
+   * This means that if no WiFi is available, still the normal interval for the sleep
+   * time will be used, assuming that this user extension has some other means to
+   * transfer the data (e.g. by using a LoRa communication if available).
+   * @return true if the interval should not be changed i.e., the configuration value will be used
+   */
+  bool veto_backup();
 
 };
 namespace {
@@ -85,8 +105,16 @@ bool UserExtension::collect(unordered_map<char *, double> &data) {
   debug_println("UserExtension Collect");
   return true;
 };
-bool UserExtension::api_call(char* api_key, char *api_additional, 
+bool UserExtension::api_call(char* api_key, char *api_additional,
         H32_Measurements &measurements, unordered_map<char *, double> &additional_data) {
   debug_println("UserExtension: Default API Call");
   return true;
 };
+bool UserExtension::api_call_no_wifi(char* api_key, char *api_additional,
+        H32_Measurements &measurements, unordered_map<char *, double> &additional_data) {
+  debug_println("UserExtension: Default API Call without WiFi");
+  return true;
+};
+bool veto_backup() {
+  return false;
+}

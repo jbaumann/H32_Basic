@@ -39,6 +39,14 @@ public:
      debug_println("Extension: Default API Call");
      return true;
   };
+  virtual bool api_call_no_wifi(char* api_key, char *api_additional,
+          H32_Measurements &measurements, unordered_map<char *, double> &additional_data) {
+     debug_println("Extension: Default API Call without WiFi");
+     return true;
+  };
+  virtual bool veto_backoff() {
+    return false;
+  }
 };
 // Out-of-line initialization for non-const static members
 vector<Extension *>  *Extension::userFunctions = NULL;

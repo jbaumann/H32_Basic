@@ -155,15 +155,47 @@ void setup() {
     return; // jump to loop()
   }
 
+  /*
+   * Collect the additional measurements from user extensions
+   */
+  // Execute the read operation of the user extensions
+  if (Extension::hasEntries()) {
+    for (Extension *extension : *Extension::getContainer()) {
+      extension->read(measurements);
+    }
+  }
+  // doing this in two distinct steps ensures that all data is read
+  unordered_map<char *, double> additional_data;
+  if (Extension::hasEntries()) {
+    for (Extension *extension : *Extension::getContainer()) {
+      extension->collect(additional_data);
+    }
+  }
+
+
   // If the WiFiManager was able to connect us to the network, then we send our data
   // Otherwise, we increment the backoff counter in the RTC ram
   if(WiFi.isConnected()){
     // Reset failed connections counter
     RTC_set_RAM(0);
-    // Collect data and send it to the chosen channels
-    read_and_send_data(measurements);
+    // Send data to the chosen channels
+    read_and_send_data(measurements, additional_data);
   } else {
-    RTC_increment_RAM();
+    // call user extensions if existing
+    bool veto_backup = false;
+    if (Extension::hasEntries()) {
+      for (Extension *extension : *Extension::getContainer()) {
+        extension->api_call_no_wifi(h32_config.api.key, h32_config.api.additional, measurements, additional_data);
+        if (extension->veto_backoff()) {
+          veto_backup = true;
+        }
+      }
+    }
+    if (veto_backup) {
+      RTC_set_RAM(0);
+    } else {
+      RTC_increment_RAM();
+    }
   }
 
   // If the button has been pressed for longer than a second, we jump to the configuration portal
@@ -193,21 +225,7 @@ void setup() {
   }
 }
 
-void read_and_send_data(H32_Measurements &measurements) {
-  // Execute the read operation of the user extensions
-  if (Extension::hasEntries()) {
-    for (Extension *extension : *Extension::getContainer()) {
-      extension->read(measurements);
-    }
-  }
-  // doing this in two distinct steps ensures that all data is read
-  unordered_map<char *, double> additional_data;
-  if (Extension::hasEntries()) {
-    for (Extension *extension : *Extension::getContainer()) {
-      extension->collect(additional_data);
-    }
-  }
-
+void read_and_send_data(H32_Measurements &measurements, unordered_map<char *, double> additional_data) {
   // send data if needed
   if(h32_config.api.type != 0) {
     api_calls[h32_config.api.type - 1](h32_config.api.key, h32_config.api.additional, measurements, additional_data);
