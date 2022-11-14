@@ -115,6 +115,6 @@ bool UserExtension::api_call_no_wifi(char* api_key, char *api_additional,
   debug_println("UserExtension: Default API Call without WiFi");
   return true;
 };
-bool veto_backup() {
+bool UserExtension::veto_backup() {
   return false;
 }
