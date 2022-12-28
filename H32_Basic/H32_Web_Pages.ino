@@ -66,7 +66,7 @@ void handle_devices() {
 
   configTime(h32_config.ntp.gmtOffset_h * 3600, h32_config.ntp.daylightOffset_h * 3600, h32_config.ntp.server);
   if (!getLocalTime(&timeinfo)) {
-    output += "<p>NTP Time: Faild to obtain NTP time.</p>";
+    output += "<p>NTP Time: Failed to obtain NTP time.</p>";
   } else {
     written = strftime(buf, 64, format, &timeinfo);
     debug_println(buf);
@@ -78,6 +78,10 @@ void handle_devices() {
   debug_println(buf);
   output += "<p>RTC Time: " + String(buf) + ".</p>";
   output += "<form action='/set_rtc'  method='get'><button>Set RTC Time</button></form><hr/>";
+
+#ifdef H32_DEBUG
+  output += "<form action='/set_rtc_debug'  method='get'><button>Set Fixed Time (Debug)</button></form><hr/>";
+#endif // H32_DEBUG
 
   H32_Measurements m;
   m.readMeasurements();
@@ -115,3 +119,24 @@ void set_rtc() {
   wm.server->sendHeader("Location", "/devices", true);
   wm.server->send(307, "text/plain");
 }
+
+#ifdef H32_DEBUG
+void set_rtc_debug() {
+  tm timeinfo;
+
+  // Set time to 30. Nov. 2022, 23:59:30
+  timeinfo.tm_sec  = 30;
+  timeinfo.tm_min  = 59;
+  timeinfo.tm_hour = 23;
+  timeinfo.tm_mday = 30;
+  timeinfo.tm_mon  = 10;           // November
+  timeinfo.tm_year = 2022 - 1900;  // Correct offset
+
+  
+  RTC_set_time(&timeinfo);
+
+  // Redirect the browser back to "/devices"
+  wm.server->sendHeader("Location", "/devices", true);
+  wm.server->send(307, "text/plain");
+}
+#endif // H32_DEBUG

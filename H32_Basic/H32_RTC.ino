@@ -17,6 +17,7 @@ void RTC_set_time(tm *time_info) {
   debug_print("Setting the RTC to: ");
   debug_println(time_info, "%H:%M:%S, %B %d %Y");
   rtc.reset();
+  RTC_stop_and_check();
   rtc.time_set(time_info);
 }
 
@@ -37,7 +38,7 @@ void RTC_get_time(tm *time_info) {
  */
 PCF85063A_Regs RTC_stop_and_check() {
   PCF85063A_Regs regs = 0;
-  PCF85063A_Regs result = 0;
+  //PCF85063A_Regs result = 0;
 
   // Get the registers
   rtc.ctrl_get(&regs);
@@ -53,21 +54,23 @@ PCF85063A_Regs RTC_stop_and_check() {
   // Check for alarms
   if (PCF85063A_REG_GET(regs, PCF85063A_REG_AF))
   {
-    result |= PCF85063A_REG_AF;
+    //result |= PCF85063A_REG_AF;
     PCF85063A_REG_CLEAR(new_regs, PCF85063A_REG_AF);
   }
   // Check for countdown
   if (PCF85063A_REG_GET(regs, PCF85063A_REG_TF))
   {
-    result |= PCF85063A_REG_TF;
+    //result |= PCF85063A_REG_TF;
     PCF85063A_REG_CLEAR(new_regs, PCF85063A_REG_TF);
   }
   // Clear the alarm enable bit
   PCF85063A_REG_CLEAR(new_regs, PCF85063A_REG_AIE);
 
   rtc.ctrl_set(new_regs, false);
-  
-  return result;
+
+  //result |= regs & 0xFF;
+  //return result;
+  return regs;
 }
 
 /*
@@ -81,9 +84,25 @@ bool RTC_set_alarm(int32_t sleeptime) {
   tm time_added;
 
   // get current time from RTC
-  rtc.time_get(&time_info);
+  bool osc_runs = rtc.time_get(&time_info);
   debug_print("Current Time: ");
   debug_println(&time_info, "%H:%M:%S, %B %d %Y");
+
+  // If the oscillator is stopped we try to restart it and signal it
+  if(!osc_runs) {
+    led_toggle();
+    delay(200);
+    led_toggle();
+    
+    // normalize
+    mktime(&time_info);
+    RTC_set_time(&time_info);
+    
+    delay(100);
+    led_toggle();
+    delay(200);
+    led_toggle();
+  }
 
   // create tm from sleeptime
   time_added.tm_sec = sleeptime % 60;

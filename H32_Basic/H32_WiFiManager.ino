@@ -87,4 +87,7 @@ void bind_additional_web_pages() {
   wm.server->on("/i2c_scan", handle_i2c_scan);
   wm.server->on("/devices", handle_devices);
   wm.server->on("/set_rtc", set_rtc);
+#ifdef H32_DEBUG
+  wm.server->on("/set_rtc_debug", set_rtc_debug);
+#endif // H32_DEBUG
 }
