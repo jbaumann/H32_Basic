@@ -3,7 +3,7 @@
  * Different methods can be implemented to allow execution of your code at a
  * specific time.
  */
-
+#include <LoRa.h>
 
 /*
  * Rename the following class UserExtension and its constructor to something
@@ -12,8 +12,9 @@
  * instance of this class so you can safely assume that these attributes will
  * be available.
  */
-class UserExtension : public Extension {
+class SimpleLoRa_Extension : public Extension {
 private:
+  bool lora_init_successful = false;
 protected:
 public:
   // Optional, if "send to back" is needed (e.g. for a display)
@@ -86,35 +87,88 @@ namespace {
    * this:
    * Extension *myUnbelievableExtension = new MyUnbelievableExtension(true);
    */
-  Extension *userExtension = new UserExtension();
+  Extension *simpleLoraExtension = new SimpleLoRa_Extension();
 }
 
-bool UserExtension::init(H32_Measurements &measurements) { 
-  debug_println("UserExtension Init");
+bool SimpleLoRa_Extension::init(H32_Measurements &measurements) { 
+  debug_println("SimpleLoRa_Extension Init");
+
+  // Initialize LoRa chip
+  pinMode(12,OUTPUT);
+  pinMode(34, INPUT);
+  
+  pinMode(2, OUTPUT);
+  digitalWrite(2,HIGH);
+
+  LoRa.setPins(16, 17, 26);
+  
+  if (!LoRa.begin(868E6)) {
+    debug_println("Starting LoRa failed!");
+  } else {
+    lora_init_successful = true;
+    debug_println("LoRa Started!");    
+  }
+  return lora_init_successful;
+};
+bool SimpleLoRa_Extension::wiFiInitialized(bool wiFiInitialized) { 
+  debug_println("SimpleLoRa_Extension WiFi Init");
   return true;
 };
-bool UserExtension::wiFiInitialized(bool wiFiInitialized) { 
-  debug_println("UserExtension WiFi Init");
+bool SimpleLoRa_Extension::read(H32_Measurements &measurements) {
+  debug_println("SimpleLoRa_Extension Read");
   return true;
 };
-bool UserExtension::read(H32_Measurements &measurements) {
-  debug_println("UserExtension Read");
+bool SimpleLoRa_Extension::collect(unordered_map<char *, double> &data) {
+  debug_println("SimpleLoRa_Extension Collect");
   return true;
 };
-bool UserExtension::collect(unordered_map<char *, double> &data) {
-  debug_println("UserExtension Collect");
-  return true;
-};
-bool UserExtension::api_call(char* api_key, char *api_additional,
+bool SimpleLoRa_Extension::api_call(char* api_key, char *api_additional,
         H32_Measurements &measurements, unordered_map<char *, double> &additional_data) {
-  debug_println("UserExtension: Default API Call");
+  debug_println("SimpleLoRa_Extension: Default API Call");
+  if (lora_init_successful) {
+    sendLoraData(measurements, additional_data);
+  }
   return true;
 };
-bool UserExtension::api_call_no_wifi(char* api_key, char *api_additional,
+bool SimpleLoRa_Extension::api_call_no_wifi(char* api_key, char *api_additional,
         H32_Measurements &measurements, unordered_map<char *, double> &additional_data) {
-  debug_println("UserExtension: Default API Call without WiFi");
+  debug_println("SimpleLoRa_Extension: Default API Call without WiFi");
+  if (lora_init_successful) {
+    sendLoraData(measurements, additional_data);
+  }
   return true;
 };
-bool UserExtension::veto_backup() {
-  return false;
+bool SimpleLoRa_Extension::veto_backup() {
+  return true;
+}
+
+void sendLoraData(H32_Measurements &measurements, unordered_map<char *, double> &additional_data) {
+  digitalWrite(12,HIGH);
+
+  float temp = (float)measurements.getTemperature();
+
+  float humidity = (float)measurements.getHumidity();
+
+  debug_println(" Temp: ");
+  debug_println(temp);
+  debug_println(" Hum: ");
+  debug_println(humidity);
+  debug_println(" Analog: ");
+
+  // start packet
+  LoRa.beginPacket();
+  LoRa.print(" Temp: ");
+  LoRa.print(temp);
+  LoRa.print(" Hum: ");
+  LoRa.print(humidity);
+  LoRa.print(" Analog: ");
+
+  // read analog here as to have sometime from the pin 12
+  int x=analogRead(34);
+  debug_println(x);
+
+  LoRa.print(x);
+  LoRa.endPacket();
+
+  digitalWrite(12,LOW);
 }
