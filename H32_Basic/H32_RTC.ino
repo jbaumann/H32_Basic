@@ -93,11 +93,11 @@ bool RTC_set_alarm(int32_t sleeptime) {
     led_toggle();
     delay(200);
     led_toggle();
-    
+
     // normalize
     mktime(&time_info);
     RTC_set_time(&time_info);
-    
+
     delay(100);
     led_toggle();
     delay(200);

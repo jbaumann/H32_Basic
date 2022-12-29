@@ -80,7 +80,7 @@ void handle_devices() {
   output += "<form action='/set_rtc'  method='get'><button>Set RTC Time</button></form><hr/>";
 
 #ifdef H32_DEBUG
-  output += "<form action='/set_rtc_debug'  method='get'><button>Set Fixed Time (Debug)</button></form><hr/>";
+  output += "<form action='/set_rtc_debug'  method='get'><button>Check RTC Month Overflow (Debug)</button></form><hr/>";
 #endif // H32_DEBUG
 
   H32_Measurements m;
@@ -123,20 +123,43 @@ void set_rtc() {
 #ifdef H32_DEBUG
 void set_rtc_debug() {
   tm timeinfo;
+  tm result;
 
-  // Set time to 30. Nov. 2022, 23:59:30
-  timeinfo.tm_sec  = 30;
+  String output = "<head>";
+  output += FPSTR(HTTP_STYLE);
+  output += "</head><body><h1>RTC Month Overflow Check</h1>";
+  String footer = "<a href='/devices' class='D'>Back</a></body>";
+
+  timeinfo.tm_sec  = 59;
   timeinfo.tm_min  = 59;
   timeinfo.tm_hour = 23;
-  timeinfo.tm_mday = 30;
-  timeinfo.tm_mon  = 10;           // November
   timeinfo.tm_year = 2022 - 1900;  // Correct offset
 
-  
-  RTC_set_time(&timeinfo);
+  int mdays[] = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
+  for(int mon = 0; mon < 12; mon++) {
+    timeinfo.tm_mday = mdays[mon];
+    timeinfo.tm_mon  = mon;
+    RTC_set_time(&timeinfo);
+    delay(2000);
+    RTC_get_time(&result);
+    output += "<p>" + String(mdays[mon]) + "." + String(mon + 1) + ".2022 -> ";
+    output += String(result.tm_mday) + "." + String(result.tm_mon + 1) + ".2022</p>";
 
-  // Redirect the browser back to "/devices"
-  wm.server->sendHeader("Location", "/devices", true);
-  wm.server->send(307, "text/plain");
+    if(mdays[mon] != 31) {
+      timeinfo.tm_mday = 31;
+    }
+    else {
+      timeinfo.tm_mday = 32;      
+    }
+    timeinfo.tm_mon  = mon;
+    RTC_set_time(&timeinfo);
+    delay(2000);
+    RTC_get_time(&result);
+    output += "<p>" + String(timeinfo.tm_mday) + "." + String(timeinfo.tm_mon + 1) + ".2022 -> ";
+    output += String(result.tm_mday) + "." + String(result.tm_mon + 1) + ".2022</p>";    
+  }
+
+  output += footer;
+  wm.server->send(200, "text/html", output);
 }
 #endif // H32_DEBUG

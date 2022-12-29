@@ -81,7 +81,7 @@ bool start_Portal() {
 
 
 /*
- * Bind the function functions for the additional web pages
+ * Bind the functions for the additional web pages
  */
 void bind_additional_web_pages() {
   wm.server->on("/i2c_scan", handle_i2c_scan);
