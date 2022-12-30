@@ -133,7 +133,7 @@ void set_rtc_debug() {
   timeinfo.tm_sec  = 59;
   timeinfo.tm_min  = 59;
   timeinfo.tm_hour = 23;
-  timeinfo.tm_year = 2022 - 1900;  // Correct offset
+  timeinfo.tm_year = 2022 - 1900; // struct tm stores from 1900 onward
 
   int mdays[] = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
   for(int mon = 0; mon < 12; mon++) {
@@ -143,13 +143,14 @@ void set_rtc_debug() {
     delay(2000);
     RTC_get_time(&result);
     output += "<p>" + String(mdays[mon]) + "." + String(mon + 1) + ".2022 -> ";
-    output += String(result.tm_mday) + "." + String(result.tm_mon + 1) + ".2022</p>";
+    output += String(result.tm_mday) + "." + String(result.tm_mon + 1) + "." + String(result.tm_year + 1900) + "</p>";
 
+  /*
     if(mdays[mon] != 31) {
       timeinfo.tm_mday = 31;
     }
     else {
-      timeinfo.tm_mday = 32;      
+      timeinfo.tm_mday = 30;      
     }
     timeinfo.tm_mon  = mon;
     RTC_set_time(&timeinfo);
@@ -157,6 +158,7 @@ void set_rtc_debug() {
     RTC_get_time(&result);
     output += "<p>" + String(timeinfo.tm_mday) + "." + String(timeinfo.tm_mon + 1) + ".2022 -> ";
     output += String(result.tm_mday) + "." + String(result.tm_mon + 1) + ".2022</p>";    
+    */
   }
 
   output += footer;

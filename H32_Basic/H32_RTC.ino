@@ -88,21 +88,9 @@ bool RTC_set_alarm(int32_t sleeptime) {
   debug_print("Current Time: ");
   debug_println(&time_info, "%H:%M:%S, %B %d %Y");
 
-  // If the oscillator is stopped we try to restart it and signal it
-  if(!osc_runs) {
-    led_toggle();
-    delay(200);
-    led_toggle();
-
-    // normalize
-    mktime(&time_info);
-    RTC_set_time(&time_info);
-
-    delay(100);
-    led_toggle();
-    delay(200);
-    led_toggle();
-  }
+  // We ensure that the oscillator is running by setting the time
+  mktime(&time_info);
+  RTC_set_time(&time_info);
 
   // create tm from sleeptime
   time_added.tm_sec = sleeptime % 60;

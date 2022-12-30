@@ -108,8 +108,8 @@ PCF85063A::time_get(tm *now)
   now->tm_hour  = bcd_decode(buf[2] & ~0xC0); /* 24h clock */
   now->tm_mday  = bcd_decode(buf[3] & ~0xC0);
   now->tm_wday  = bcd_decode(buf[4] & ~0xF8);
-  now->tm_mon   = bcd_decode(buf[5] & ~0xE0);
-  now->tm_year  = bcd_decode(buf[6]);
+  now->tm_mon   = bcd_decode(buf[5] & ~0xE0) - 1; // struct tm stores 0-11
+  now->tm_year  = bcd_decode(buf[6]) + 100;       // struct tm stores from 1900 onward, we assume 20xx
 
   return !(buf[0] & 0x80);
 }
@@ -124,8 +124,8 @@ PCF85063A::time_set(tm *new_time)
   buf[2] = bcd_encode(new_time->tm_hour);
   buf[3] = bcd_encode(new_time->tm_mday);
   buf[4] = bcd_encode(new_time->tm_wday);
-  buf[5] = bcd_encode(new_time->tm_mon);
-  buf[6] = bcd_encode(new_time->tm_year);
+  buf[5] = bcd_encode(new_time->tm_mon + 1);      // the chips stores from 1-12
+  buf[6] = bcd_encode(new_time->tm_year - 100);   // the chip only stores the last two digits, we assume 20xx
 
   return i2c_write(REG_TIME_DATE_ADDR, sizeof(buf), buf);
 }
