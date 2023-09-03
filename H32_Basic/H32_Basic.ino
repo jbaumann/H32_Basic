@@ -36,9 +36,9 @@
 /*
  * The following three values represent the current version of the firmware
  */
-const uint8_t H32_MAJOR = 1;
-const uint8_t H32_MINOR = 24;
-const uint8_t H32_PATCH = 0;
+const uint8_t H32_MAJOR = 2;
+const uint8_t H32_MINOR = 25;
+const uint8_t H32_PATCH = 1;
 
 /*
  * The following values can be adjusted
@@ -90,7 +90,7 @@ WiFiManager wm;
 
 void setup() {
   // Turn off any alarm in RTC
-  PCF85063A_Regs rtc_results = RTC_stop_and_check();
+  uint16_t rtc_results = RTC_stop_and_check();
 
   // Set the alarm, in case we are in a low power situation
   RTC_set_alarm(SLEEPTIME_FALLBACK); // parameters

@@ -21,6 +21,10 @@ bool thingspeak_call(char* api_key, char *api_additional, H32_Measurements &meas
   ThingSpeak.setField(2, (float)measurements.getHumidity());
   ThingSpeak.setField(3, (float)measurements.getBatV());
   ThingSpeak.setField(4, (float)measurements.getExtV());
+#ifdef H32_REV_3
+  ThingSpeak.setField(5, (float)measurements.getBatPercentage());
+  ThingSpeak.setField(6, (float)measurements.getBatChargeRate());
+#endif // H32_REV_3
 
   int x = ThingSpeak.writeFields(myChannelNumber, api_key);
   if(x == 200){
@@ -41,6 +45,10 @@ void create_json(JsonObject &doc, H32_Measurements &measurements, unordered_map<
   doc["Humidity"][0]["value"] = measurements.getHumidity();
   doc["Battery Voltage"][0]["value"] = measurements.getBatV();
   doc["External Voltage"][0]["value"] = measurements.getExtV();
+#ifdef H32_REV_3
+  doc["Battery Percentage"][0]["value"] = measurements.getBatPercentage();
+  doc["Battery Charge Rate"][0]["value"] = measurements.getBatChargeRate();
+#endif // H32_REV_3
 
   for(const auto & res: additional_data) {
      debug_print("Additional: ");

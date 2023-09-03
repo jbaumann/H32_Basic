@@ -94,9 +94,17 @@ void handle_devices() {
     output += "AHT10 not found. Check your board.<hr/>";
   }
 
-  output += "<h2>Voltages</h2>";
+  output += "<h2>Measurements</h2>";
   output += "<p>Battery Voltage: ";
   output += String(m.getBatV()) + "V</p>";
+
+#ifdef H32_REV_3
+  output += "<p>Battery Percentage: ";
+  output += String(m.getBatPercentage()) + "%</p>";
+  output += "<p>Battery Charge Rate: ";
+  output += String(m.getBatChargeRate()) + "%/h</p><hr/>";
+#endif // H32_REV_3
+
   output += "<p>Ext Voltage: ";
   output += String(m.getExtV()) + "V</p><hr/>";
   output += footer;

@@ -44,6 +44,62 @@ double read_voltage (uint8_t pin, double coefficient, double constant) {
   return result;
 }
 
+
+double read_ext_voltage() {
+  return read_voltage(h32_config.ext_v.pin, h32_config.ext_v.coefficient, h32_config.ext_v.constant);
+}
+
+
+#ifdef H32_REV_3
+
+
+SFE_MAX1704X gauge(MAX1704X_MAX17048);
+bool gauge_available = false;
+
+double read_bat_voltage() {
+  double bat_v = 0;
+  if(!gauge_available) {
+    debug_println("Starting Gauge");
+    Wire.begin();
+    gauge_available = gauge.begin();
+  }
+  bat_v = gauge.getVoltage();
+  debug_print(bat_v);
+  debug_println("V");
+
+  return bat_v;
+}
+double read_bat_percentage() {
+  double bat_p = 0;
+  if(!gauge_available) {
+    debug_println("Starting Gauge");
+    Wire.begin();
+    gauge_available = gauge.begin();
+  }
+  bat_p = gauge.getSOC();
+  debug_print(bat_p);
+  debug_println("%");
+
+  return bat_p;
+}
+double read_bat_charge_rate() {
+  double bat_c = 0;
+  if(!gauge_available) {
+    debug_println("Starting Gauge");
+    Wire.begin();
+    gauge_available = gauge.begin();
+  }
+  bat_c = gauge.getChangeRate();
+  debug_print(bat_c);
+  debug_println("%/h");
+
+  return bat_c;
+}
+
+
+#else //H32_REV_2
+
+
 double read_bat_voltage() {
  if(h32_config.bat_v.activation != 0) {
     pin_on(h32_config.bat_v.activation);
@@ -55,6 +111,5 @@ double read_bat_voltage() {
   return bat_v;
 }
 
-double read_ext_voltage() {
-  return read_voltage(h32_config.ext_v.pin, h32_config.ext_v.coefficient, h32_config.ext_v.constant);
-}
+
+#endif //H32_REV_3

@@ -2,81 +2,38 @@
  * The following functions implement the communication with the sensor.
  */
 
-#include <Adafruit_AHTX0.h>
+#include "H32_Basic.h"
+#include <AHTxx.h>
 
-const uint8_t aht10_retries = 3;
+const uint8_t aht_retries = 3;
 
-/*
- * All of the following only because the implementation for an alternative address is missing.
- * A pull request is under way.
- */
-#define AHTX0_I2CADDR_ALTERNATE 0x39
+#ifdef H32_REV_3
+#define H32_AHTX0_I2CADDR AHTXX_ADDRESS_X38
+#define AHT_SENSOR_TYPE AHT2x_SENSOR
+#else
+#define H32_AHTX0_I2CADDR AHT10_ADDRESS_X39
+#define AHT_SENSOR_TYPE AHT1x_SENSOR
+#endif
 
-class My_AHTX0 : public Adafruit_AHTX0 {
-public:
-  bool begin(TwoWire *wire = &Wire, int32_t sensor_id = 0, uint8_t i2c_address = AHTX0_I2CADDR_DEFAULT);
-};
 
-bool My_AHTX0::begin(TwoWire *wire, int32_t sensor_id, uint8_t i2c_address) {
-  delay(20); // 20 ms to power up
-
-  if (i2c_dev) {
-    delete i2c_dev; // remove old interface
-  }
-
-  i2c_dev = new Adafruit_I2CDevice(i2c_address, wire);
-
-  if (!i2c_dev->begin()) {
-    return false;
-  }
-
-  uint8_t cmd[3];
-
-  cmd[0] = AHTX0_CMD_SOFTRESET;
-  if (!i2c_dev->write(cmd, 1)) {
-    return false;
-  }
-  delay(20);
-
-  cmd[0] = AHTX0_CMD_CALIBRATE;
-  cmd[1] = 0x08;
-  cmd[2] = 0x00;
-  if (!i2c_dev->write(cmd, 3)) {
-    return false;
-  }
-
-  while (getStatus() & AHTX0_STATUS_BUSY) {
-    delay(10);
-  }
-  if (!(getStatus() & AHTX0_STATUS_CALIBRATED)) {
-    return false;
-  }
-
-  humidity_sensor = new Adafruit_AHTX0_Humidity(this);
-  temp_sensor = new Adafruit_AHTX0_Temp(this);
-  return true;
-};
-/*
- * End of the class definition
- */
-
-My_AHTX0 aht;
-//Adafruit_AHTX0 aht;
+AHTxx aht(H32_AHTX0_I2CADDR, AHT_SENSOR_TYPE);
 
 /*
- * Try to initialize the AHT10 sensor "aht10_retries" times before
+ * Try to initialize the AHTxx sensor "aht_retries" times before
  * giving up.
  */
 bool init_sensor() {
-  debug_println("AHT10 initialization");
+  debug_println("AHTxx initialization");
 
   bool result = false;
-  for(int i = 0; i < aht10_retries; i++) {
-    result = aht.begin(&Wire, 0, AHTX0_I2CADDR_ALTERNATE);
+  for(int i = 0; i < aht_retries; i++) {
+    result = aht.begin();
     if(result) {
       debug_println("Found AHT sensor");
       break;
     }
+    debug_println("AHT sensor not found");
+//    aht.softReset();
     delay(100);
   }
   return result;
@@ -86,28 +43,28 @@ bool init_sensor() {
  * Read the temperature from the sensor
  */
 float get_temperature() {
-  sensors_event_t temp;
+  float temperature;
 
-  aht.getTemperatureSensor()->getEvent(&temp);
+  temperature = aht.readTemperature();
 
   debug_print("Temperature: ");
-  debug_print(temp.temperature);
+  debug_print(temperature);
   debug_println(" degrees C");
 
-  return temp.temperature;
+  return temperature;
 }
 
 /*
  * Read the humidity from the sensor
  */
 float get_humidity() {
-  sensors_event_t humidity;
+  float humidity;
   
-  aht.getHumiditySensor()->getEvent(&humidity);
+  humidity = aht.readHumidity(); ;
 
   debug_print("Humidity: ");
-  debug_print(humidity.relative_humidity);
+  debug_print(humidity);
   debug_println(" % rH");
 
-  return humidity.relative_humidity;
+  return humidity;
 }

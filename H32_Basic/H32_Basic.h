@@ -2,6 +2,18 @@
 #define H32_BASIC_H
 
 /*
+ * The following definition is used to distinguish between the different revisions of the H32.
+ * If H32_REV_3 is defined we compile for the revision 3 of the H32 board
+ */
+#define H32_REV_3
+
+#ifdef H32_REV_3
+#pragma message "Compiling for H32 revision 3"
+#else
+#pragma message "Compiling for H32 revision 1 or 2"
+#endif
+
+/*
  * The following macros allow us to enable/disable debugging without runtime overhead
  */
 #define SERIAL_SPEED 115200
@@ -27,6 +39,10 @@ using namespace std;
 #include <ArduinoJson.h>
 #include <soc/soc.h>
 #include <soc/rtc_cntl_reg.h>
+
+#ifdef H32_REV_3
+#include <SparkFun_MAX1704x_Fuel_Gauge_Arduino_Library.h>
+#endif //H32_REV_3
 
 #include "PCF85063A.h"
 
