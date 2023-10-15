@@ -19,6 +19,20 @@ int init_WiFiManager() {
   // Set the title for the configuration page
   wm.setTitle(h32_config.name);
 
+  if (strlen(h32_config.static_conf.ip_address) != 0) {
+    //set static ip
+    IPAddress _ip, _gw, _sn;
+    _ip.fromString(h32_config.static_conf.ip_address);
+    if (strlen(h32_config.static_conf.gateway)) {
+      _gw.fromString(h32_config.static_conf.gateway);
+    }
+    if (strlen(h32_config.static_conf.subnet)) {
+      _sn.fromString(h32_config.static_conf.subnet);
+    }
+    wm.setSTAStaticIPConfig(_ip, _gw, _sn);
+  }
+
+
   // Add the additional web pages
   wm.setWebServerCallback(bind_additional_web_pages);
 

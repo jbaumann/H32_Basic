@@ -150,6 +150,11 @@ typedef struct H32_Config {
     int8_t daylightOffset_h = 1;
     int8_t gmtOffset_h = 1;
   } ntp;
+  struct {
+    char ip_address[16] {""};
+    char gateway[16] {""};
+    char subnet[16] {""};
+  } static_conf;
 } H32_Config;
 
 #endif // H32_BASIC_H
