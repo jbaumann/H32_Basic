@@ -22,6 +22,9 @@ public:
     debug_println("Extension: Default Init");
     return true;
   };
+  virtual bool veto_WiFi() {
+    return false;
+  }
   virtual bool wiFiInitialized(bool wiFiInitialized) {
     debug_println("Extension: Default wiFiInitialized");
     return true;

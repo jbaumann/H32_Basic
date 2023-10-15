@@ -136,9 +136,22 @@ void setup() {
     debug_println(rtc_results);
   }
 
+  // Check whether an Extension vetoes the WiFi connection
+  bool veto_Wifi = false;
+  if (Extension::hasEntries()) {
+    for (Extension *extension : *Extension::getContainer()) {
+      veto_Wifi = extension->veto_WiFi();
+      if (veto_Wifi == true) {
+        break;
+      }
+    }
+  }
+
   // We initialize the WiFiManager that checks for stored credentials. If none are available,
   // a captive portal is opened. Otherwise it tries to connect to the network.
-  init_WiFiManager();
+  if(!veto_Wifi) {
+    init_WiFiManager();
+  }
 
   // Execute the wiFiInitialized operation of the user extensions
   if (Extension::hasEntries()) {
