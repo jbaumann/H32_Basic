@@ -37,8 +37,8 @@
  * The following three values represent the current version of the firmware
  */
 const uint8_t H32_MAJOR = 2;
-const uint8_t H32_MINOR = 25;
-const uint8_t H32_PATCH = 1;
+const uint8_t H32_MINOR = 27;
+const uint8_t H32_PATCH = 0;
 
 /*
  * The following values can be adjusted
