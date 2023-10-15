@@ -15,11 +15,11 @@ PCF85063A rtc;
  * exchanging the battery) we reset the RTC registers first.
  */
 void RTC_set_time(tm *time_info) {
-  debug_print("Setting the RTC to: ");
-  debug_println(time_info, "%H:%M:%S, %B %d %Y");
   rtc.reset();
   RTC_stop_and_check();
   rtc.time_set(time_info);
+  debug_print("Setting the RTC to: ");
+  debug_println(time_info, "%H:%M:%S, %B %d %Y");  
 }
 
 /*
@@ -81,17 +81,24 @@ PCF85063A_Regs RTC_stop_and_check() {
  */
 bool RTC_set_alarm(int32_t sleeptime) {
   debug_println("Set Alarm");
+  RTC_stop_and_check();
+ 
   tm time_info;
   tm time_added;
 
   // get current time from RTC
   bool osc_runs = rtc.time_get(&time_info);
-  debug_print("Current Time: ");
-  debug_println(&time_info, "%H:%M:%S, %B %d %Y");
 
-  // We ensure that the oscillator is running by setting the time
   mktime(&time_info);
-  RTC_set_time(&time_info);
+
+  // This code is for when I work out how to force the osc to start
+  // I think this is done when the time gets set
+  if (!osc_runs) {
+    RTC_set_time(&time_info);
+    // Set the RTC clock time here if it's not running
+    debug_print("osc not running, so started");
+    //rtc.start(); // Replace with the appropriate method to start the RTC oscillator
+  }
 
   // create tm from sleeptime
   time_added.tm_sec = sleeptime % 60;
@@ -113,13 +120,15 @@ bool RTC_set_alarm(int32_t sleeptime) {
 
   // normalize
   mktime(&time_info);
-  
+ 
   // set rtc alarm
   debug_print("Wakeup Time: ");
   debug_println(&time_info, "%H:%M:%S, %B %d %Y");
-
+ 
+  tm timenow;
+  RTC_get_time(&timenow);
   return rtc.alarm_set(&time_info, true);
-}
+}// end of RTC_set_alarm
 
 /*
  * Get the byte stored in the RTC RAM
@@ -156,3 +165,4 @@ bool RTC_increment_RAM() {
     return true;
   }
 }
+
