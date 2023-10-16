@@ -37,8 +37,8 @@
  * The following three values represent the current version of the firmware
  */
 const uint8_t H32_MAJOR = 2;
-const uint8_t H32_MINOR = 27;
-const uint8_t H32_PATCH = 0;
+const uint8_t H32_MINOR = 29;
+const uint8_t H32_PATCH = 3;
 
 /*
  * The following values can be adjusted
@@ -64,7 +64,7 @@ const int SLEEPTIME_FALLBACK = 120;
  * have been pressed long enough
  */
 volatile uint32_t button_pressed = 0;
-const int button_press_length = 1000;
+const int button_press_length = 500;
 
 
 // The header file in turn includes all needed header files and defines everything needed
@@ -189,6 +189,19 @@ void setup() {
   // If the WiFiManager was able to connect us to the network, then we send our data
   // Otherwise, we increment the backoff counter in the RTC ram
   if(WiFi.isConnected()){
+    // Print connection details
+    debug_println("Connection Details:");
+    debug_print("Network: ");
+    debug_println(WiFi.SSID());
+    debug_print("IP Address: ");
+    debug_println(WiFi.localIP());
+    debug_print("Gateway: ");
+    debug_println(WiFi.gatewayIP());
+    debug_print("Subnet Mask: ");
+    debug_println(WiFi.subnetMask());
+    debug_print("DNS Server: ");
+    debug_println(WiFi.dnsIP());
+
     // Reset failed connections counter
     RTC_set_RAM(0);
     // Send data to the chosen channels

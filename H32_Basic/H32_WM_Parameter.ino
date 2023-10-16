@@ -51,6 +51,13 @@ WiFiManagerParameter ntp_heading("<h2>NTP</h2>");
 WiFiManagerParameter ntp_server("ntp_server", "NTP Server", "", NAME_LENGTH);
 WiFiManagerParameter ntp_daylight_offset("ntp_daylight_offset", "NTP Daylight Offset", "", U8_LENGTH, "pattern='\\d{0,2}'");
 WiFiManagerParameter ntp_timezone_offset("ntp_timezone_offset", "NTP Timezone Offset", "", U8_LENGTH, "pattern='\\d{0,2}'");
+// Static IP Settings -----------
+WiFiManagerParameter static_ip_heading("<h2>Static IP Settings</h2>");
+WiFiManagerParameter static_ip_address("static_ip_address", "IP Address", "", IP_ADDR_LENGTH, "pattern='^((25[0-5]|(2[0-4]|1\\d|[1-9]|)\\d)\\.?\\b){4}$'");
+WiFiManagerParameter static_gateway("static_gateway", "Gateway", "", IP_ADDR_LENGTH, "pattern='^((25[0-5]|(2[0-4]|1\\d|[1-9]|)\\d)\\.?\\b){4}$'");
+WiFiManagerParameter static_subnet("static_subnet", "Subnet", "", IP_ADDR_LENGTH, "pattern='^((25[0-5]|(2[0-4]|1\\d|[1-9]|)\\d)\\.?\\b){4}$'");
+WiFiManagerParameter static_dns("static_dns", "DNS Server", "", IP_ADDR_LENGTH, "pattern='^((25[0-5]|(2[0-4]|1\\d|[1-9]|)\\d)\\.?\\b){4}$'");
+
 
 /*
  * Add parameters to WifiManager and set their values to the ones in the config struct
@@ -140,6 +147,17 @@ void add_parameters() {
   ntp_timezone_offset.setValue(String(h32_config.ntp.gmtOffset_h).c_str(), U8_LENGTH);
   wm.addParameter(&ntp_daylight_offset);
   ntp_daylight_offset.setValue(String(h32_config.ntp.daylightOffset_h).c_str(), U8_LENGTH);
+
+  // Static IP Address
+  wm.addParameter(&static_ip_heading);
+  wm.addParameter(&static_ip_address);
+  static_ip_address.setValue(h32_config.static_conf.ip_address, IP_ADDR_LENGTH);
+  wm.addParameter(&static_gateway);
+  static_gateway.setValue(h32_config.static_conf.gateway, IP_ADDR_LENGTH);
+  wm.addParameter(&static_subnet);
+  static_subnet.setValue(h32_config.static_conf.subnet, IP_ADDR_LENGTH);
+  wm.addParameter(&static_dns);
+  static_dns.setValue(h32_config.static_conf.dns, IP_ADDR_LENGTH);
 }
 
 /*
@@ -196,7 +214,42 @@ void saveParamsCallback () {
   retrieve_from_form(&h32_config.ntp.gmtOffset_h, &ntp_timezone_offset);
   retrieve_from_form(&h32_config.ntp.daylightOffset_h, &ntp_daylight_offset);
 
+  // Static IP
+  retrieve_from_form(h32_config.static_conf.ip_address, &static_ip_address, IP_ADDR_LENGTH);
+  retrieve_from_form(h32_config.static_conf.gateway, &static_gateway, IP_ADDR_LENGTH);
+  retrieve_from_form(h32_config.static_conf.subnet, &static_subnet, IP_ADDR_LENGTH);
+  retrieve_from_form(h32_config.static_conf.dns, &static_dns, IP_ADDR_LENGTH);
+
   write_config();
+}
+/*
+ * Retrieve IP configuration, store it in the config and save that to the persistent storage
+ */
+void saveConfigCallback () {
+  debug_println("Save Config Callback");
+  
+  String _ip  = wm.server->arg(FPSTR(S_ip));
+  String _gw  = wm.server->arg(FPSTR(S_gw));
+  String _sn  = wm.server->arg(FPSTR(S_sn));
+  String _dns = wm.server->arg(FPSTR(S_dns));
+
+  strncpy(h32_config.static_conf.ip_address, _ip.c_str(),  IP_ADDR_LENGTH);
+  strncpy(h32_config.static_conf.gateway,    _gw.c_str(),  IP_ADDR_LENGTH);
+  strncpy(h32_config.static_conf.subnet,     _sn.c_str(),  IP_ADDR_LENGTH);
+  strncpy(h32_config.static_conf.dns,        _dns.c_str(), IP_ADDR_LENGTH);
+
+  debug_print("IP Address: ");
+  debug_println(h32_config.static_conf.ip_address);
+  debug_print("Gateway: ");
+  debug_println(h32_config.static_conf.gateway);
+  debug_print("Subnet: ");
+  debug_println(h32_config.static_conf.subnet);
+  debug_print("DNS Server: ");
+  debug_println(h32_config.static_conf.dns);
+
+  write_config();
+
+  debug_println("End of Config Callback");
 }
 
 void retrieve_from_form(char *config_val, WiFiManagerParameter *wmp, int length) {  

@@ -10,6 +10,7 @@
 #define DESERIALIZE_SSID_2(doc, name) if(!(doc[#name]).isNull()){ strncpy(h32_config.name, doc[""#name], SSID_LENGTH); };
 #define DESERIALIZE_TOPIC_3(doc, part, name) if(!(doc[#part][#name]).isNull()){ strncpy(h32_config.part.name, doc[#part][#name], TOPIC_LENGTH); };
 #define DESERIALIZE_NAME_3(doc, part, name) if(!(doc[#part][#name]).isNull()){ strncpy(h32_config.part.name, doc[#part][#name], NAME_LENGTH); };
+#define DESERIALIZE_IP_3(doc, part, name) if(!(doc[#part][#name]).isNull()){ strncpy(h32_config.part.name, doc[#part][#name], IP_ADDR_LENGTH); };
 
 
 #include <Preferences.h>
@@ -72,6 +73,10 @@ bool read_config() {
   DESERIALIZE_NAME_3(doc, ntp, server);
   DESERIALIZE_3(doc, ntp, daylightOffset_h);
   DESERIALIZE_3(doc, ntp, gmtOffset_h);
+  DESERIALIZE_IP_3(doc, static_conf, ip_address);
+  DESERIALIZE_IP_3(doc, static_conf, gateway);
+  DESERIALIZE_IP_3(doc, static_conf, subnet);
+  DESERIALIZE_IP_3(doc, static_conf, dns);
 
   config_file.close();
   LittleFS.end();
@@ -136,6 +141,10 @@ bool write_config() {
   SERIALIZE_3(doc, ntp, server);
   SERIALIZE_3(doc, ntp, daylightOffset_h);
   SERIALIZE_3(doc, ntp, gmtOffset_h);
+  SERIALIZE_3(doc, static_conf, ip_address);
+  SERIALIZE_3(doc, static_conf, gateway);
+  SERIALIZE_3(doc, static_conf, subnet);
+  SERIALIZE_3(doc, static_conf, dns);
 
   serializeJson(doc, config_file);
 #ifdef H32_DEBUG

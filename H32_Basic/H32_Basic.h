@@ -51,6 +51,7 @@ using namespace std;
 const uint8_t SSID_LENGTH = 33;
 const uint8_t NAME_LENGTH = 50;
 const uint8_t TOPIC_LENGTH = 100;  // in theory 32.767 characters
+const uint8_t IP_ADDR_LENGTH = 16;
 const uint8_t U32_LENGTH = 10;
 const uint8_t U16_LENGTH = 5;
 const uint8_t U8_LENGTH = 3;
@@ -151,9 +152,10 @@ typedef struct H32_Config {
     int8_t gmtOffset_h = 1;
   } ntp;
   struct {
-    char ip_address[16] {""};
-    char gateway[16] {""};
-    char subnet[16] {""};
+    char ip_address[IP_ADDR_LENGTH+1] {""};
+    char gateway[IP_ADDR_LENGTH+1] {""};
+    char subnet[IP_ADDR_LENGTH+1] {""};
+    char dns[IP_ADDR_LENGTH+1] {"8.8.8.8"};
   } static_conf;
 } H32_Config;
 

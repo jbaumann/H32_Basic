@@ -19,9 +19,12 @@ int init_WiFiManager() {
   // Set the title for the configuration page
   wm.setTitle(h32_config.name);
 
+  wm.setShowStaticFields(true);
+  wm.setShowDnsFields(true);
+
   if (strlen(h32_config.static_conf.ip_address) != 0) {
     //set static ip
-    IPAddress _ip, _gw, _sn;
+    IPAddress _ip, _gw, _sn, _dns;
     _ip.fromString(h32_config.static_conf.ip_address);
     if (strlen(h32_config.static_conf.gateway)) {
       _gw.fromString(h32_config.static_conf.gateway);
@@ -29,7 +32,10 @@ int init_WiFiManager() {
     if (strlen(h32_config.static_conf.subnet)) {
       _sn.fromString(h32_config.static_conf.subnet);
     }
-    wm.setSTAStaticIPConfig(_ip, _gw, _sn);
+    if (strlen(h32_config.static_conf.dns)) {
+      _dns.fromString(h32_config.static_conf.dns);
+    }
+    wm.setSTAStaticIPConfig(_ip, _gw, _sn, _dns);
   }
 
 
@@ -38,6 +44,10 @@ int init_WiFiManager() {
 
   // Add the callback to save parameters
   wm.setSaveParamsCallback(saveParamsCallback);
+
+  // Add the callback for the config parameters i.e., the static IP if configured
+  wm.setSaveConfigCallback(saveConfigCallback);
+  wm.setBreakAfterConfig(true);
 
   // Set the custom menu
   wm.setMenu(menu);

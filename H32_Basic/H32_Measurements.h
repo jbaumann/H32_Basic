@@ -37,8 +37,10 @@ public:
     if(!valid) {
       debug_println("Acquiring Measurements.");
       batV = read_bat_voltage();
+#ifdef H32_REV_3
       batPercentage = read_bat_percentage();
       batChargeRate = read_bat_charge_rate();
+#endif //H32_REV_3
       extV = read_ext_voltage();
       if(init_sensor()) {
         temperature = (int)(get_temperature() * 100 + 0.5) / 100.0;
@@ -51,8 +53,10 @@ public:
     }
   };
   double getBatV() { readMeasurements(); return batV;};
+#ifdef H32_REV_3
   double getBatPercentage() { readMeasurements(); return batPercentage;};
   double getBatChargeRate() { readMeasurements(); return batChargeRate;};
+#endif //H32_REV_3
   double getExtV() { readMeasurements(); return extV; };
   double getTemperature() { readMeasurements(); return temperature; };
   double getHumidity() { readMeasurements(); return humidity; };
