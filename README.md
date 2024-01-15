@@ -10,7 +10,7 @@ If you want to read about the details of hardware and firmware, jump to the [Wik
 
 The H32 by Burgduino is an ESP32-board with a lot of functionality, most importantly it features a low-power current of only 250nA, which is unbelievably low for an ESP32-board. It reaches this low current by using a power switch to fully separate the ESP32 and connected sensors from power. An RTC can be programmed to turn the system on again after a programmable time. Currently there are two revisions with slight differences, but the same firmware can be used for both of them.
 
-Here a picture of the current revision 4:
+Here a picture of the current revision 4 (directly from its bag, I haven't even removed the optional header yet):
 
 <img src="https://github.com/jbaumann/H32_Basic/wiki/miscellaneous/H32rev4_portrait.jpg" width=50%>
 
